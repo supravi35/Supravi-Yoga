@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supravi Yoga - Find Your Inner Peace</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         /* Global Styles */
         :root {
@@ -13,6 +24,7 @@
             --light: #f6f6f6;
             --dark: #333;
             --accent: #ff6b6b;
+            --success: #28a745;
         }
         
         * {
@@ -65,6 +77,25 @@
         
         .btn-secondary:hover {
             background-color: #e09e00;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-disabled:hover {
+            transform: none;
+            background-color: #6c757d;
         }
         
         section {
@@ -144,6 +175,30 @@
             gap: 15px;
         }
         
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
         /* Mobile Menu */
         .menu-toggle {
             display: none;
@@ -187,6 +242,125 @@
         .hero p {
             font-size: 1.2rem;
             margin-bottom: 30px;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: var(--primary);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dashboard-nav button {
+            background: none;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-nav button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .dashboard-content {
+            display: none;
+        }
+
+        .dashboard-content.active {
+            display: block;
+        }
+
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dashboard-class-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-class-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-class-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .dashboard-card-content {
+            padding: 25px;
+        }
+
+        .class-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-locked {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unlocked {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .class-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .zoom-link {
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .zoom-link:hover {
+            background: #218838;
         }
         
         /* About Section */
@@ -414,6 +588,8 @@
             max-width: 500px;
             position: relative;
             box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         .close-modal {
@@ -458,6 +634,106 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
+        }
+        
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .otp-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .otp-input {
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .resend-otp {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Payment Modal */
+        .payment-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .payment-instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .payment-instructions ol {
+            margin-left: 20px;
+        }
+
+        .payment-instructions li {
+            margin-bottom: 10px;
+        }
+
+        .razorpay-link {
+            background: #528ff0;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .razorpay-link:hover {
+            background: #4285f4;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         /* Footer */
@@ -571,6 +847,19 @@
                 gap: 10px;
                 margin-top: 20px;
             }
+            
+            .user-menu {
+                display: none;
+            }
+
+            .dashboard-nav {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .class-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         @media (max-width: 768px) {
@@ -630,248 +919,316 @@
                     </div>
                 </ul>
                 
-                <div class="auth-buttons">
+                <div class="auth-buttons" id="authButtons">
                     <button class="btn" id="loginBtn">Login</button>
                     <button class="btn btn-secondary" id="signupBtn">Sign Up</button>
+                </div>
+                
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span id="userName"></span>
+                    </div>
+                    <button class="btn" id="dashboardBtn">Dashboard</button>
+                    <button class="btn" id="logoutBtn">Logout</button>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Find Your Inner Peace with Supravi Yoga</h1>
-                <p>Join our online yoga community and transform your body, mind, and spirit with expert guidance from certified instructors.</p>
-                <a href="#classes" class="btn btn-secondary">Explore Classes</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <h2 class="section-title">About Supravi Yoga</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>Supravi Yoga is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by master yogi Charitha Chowdary, our studio brings together traditional wisdom and modern approaches to wellness.</p>
-                    <p>We believe that yoga is for everyone - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
-                    <p>At Supravi Yoga, we offer a variety of styles including Hatha, Vinyasa, Yin, and Restorative yoga. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
-                    <a href="#" class="btn">Meet Our Instructors</a>
-                </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
+    <!-- Landing Page Content -->
+    <div id="landingPage">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Find Your Inner Peace with Supravi Yoga</h1>
+                    <p>Join our online yoga community and transform your body, mind, and spirit with expert guidance from certified instructors.</p>
+                    <a href="#classes" class="btn btn-secondary">Explore Classes</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Benefits Section -->
-    <section id="benefits" class="benefits">
-        <div class="container">
-            <h2 class="section-title">Benefits of Yoga</h2>
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-heart"></i>
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <h2 class="section-title">About Supravi Yoga</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Supravi Yoga is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by master yogi Charitha Chowdary, our studio brings together traditional wisdom and modern approaches to wellness.</p>
+                        <p>We believe that yoga is for everyone - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
+                        <p>At Supravi Yoga, we offer a variety of styles including Hatha, Vinyasa, Yin, and Restorative yoga. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
+                        <a href="#" class="btn">Meet Our Instructors</a>
                     </div>
-                    <h3>Improves Flexibility</h3>
-                    <p>Yoga slowly stretches your muscles and increases your range of motion, helping you move more freely and with less pain.</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-brain"></i>
+                    <div class="about-image">
+                        <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
                     </div>
-                    <h3>Reduces Stress</h3>
-                    <p>Through meditation and breathing exercises, yoga helps calm the nervous system and quiet the mind, reducing anxiety and stress.</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Builds Strength</h3>
-                    <p>Yoga poses require you to support the weight of your own body in new ways, building functional strength throughout your entire body.</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-balance-scale"></i>
-                    </div>
-                    <h3>Improves Posture</h3>
-                    <p>Yoga increases body awareness and strengthens core muscles, helping you maintain proper alignment in your daily activities.</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-lungs"></i>
-                    </div>
-                    <h3>Better Breathing</h3>
-                    <p>Pranayama (breath control) teaches you to take deeper, slower breaths which improves lung function and calms the body.</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-bed"></i>
-                    </div>
-                    <h3>Better Sleep</h3>
-                    <p>Regular yoga practice can help you fall asleep faster, sleep deeper, and wake up more refreshed by reducing stress and calming the mind.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Classes Section -->
-    <section id="classes" class="classes">
-        <div class="container">
-            <h2 class="section-title">Our Classes</h2>
-            <div class="classes-container">
-                <div class="class-card">
-                    <div class="class-image">
-                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Hatha Yoga">
-                    </div>
-                    <div class="class-content">
-                        <h3>Hatha Yoga</h3>
-                        <div class="class-info">
-                            <span><i class="far fa-clock"></i> 60 min</span>
-                            <span><i class="fas fa-user"></i> All Levels</span>
+        <!-- Benefits Section -->
+        <section id="benefits" class="benefits">
+            <div class="container">
+                <h2 class="section-title">Benefits of Yoga</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-heart"></i>
                         </div>
-                        <p>A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners.</p>
-                        <button class="btn">Join Class</button>
+                        <h3>Improves Flexibility</h3>
+                        <p>Yoga slowly stretches your muscles and increases your range of motion, helping you move more freely and with less pain.</p>
                     </div>
-                </div>
-                
-                <div class="class-card">
-                    <div class="class-image">
-                        <img src="https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Vinyasa Flow">
-                    </div>
-                    <div class="class-content">
-                        <h3>Vinyasa Flow</h3>
-                        <div class="class-info">
-                            <span><i class="far fa-clock"></i> 75 min</span>
-                            <span><i class="fas fa-user"></i> Intermediate</span>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-brain"></i>
                         </div>
-                        <p>A dynamic practice that links movement with breath in a flowing sequence of poses.</p>
-                        <button class="btn">Join Class</button>
+                        <h3>Reduces Stress</h3>
+                        <p>Through meditation and breathing exercises, yoga helps calm the nervous system and quiet the mind, reducing anxiety and stress.</p>
                     </div>
-                </div>
-                
-                <div class="class-card">
-                    <div class="class-image">
-                        <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yin Yoga">
-                    </div>
-                    <div class="class-content">
-                        <h3>Yin Yoga</h3>
-                        <div class="class-info">
-                            <span><i class="far fa-clock"></i> 45 min</span>
-                            <span><i class="fas fa-user"></i> All Levels</span>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        <p>A slow-paced style with poses held for longer periods to target deep connective tissues.</p>
-                        <button class="btn">Join Class</button>
+                        <h3>Builds Strength</h3>
+                        <p>Yoga poses require you to support the weight of your own body in new ways, building functional strength throughout your entire body.</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <h3>Improves Posture</h3>
+                        <p>Yoga increases body awareness and strengthens core muscles, helping you maintain proper alignment in your daily activities.</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <h3>Better Breathing</h3>
+                        <p>Pranayama (breath control) teaches you to take deeper, slower breaths which improves lung function and calms the body.</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <h3>Better Sleep</h3>
+                        <p>Regular yoga practice can help you fall asleep faster, sleep deeper, and wake up more refreshed by reducing stress and calming the mind.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Yoga Postures Section -->
-    <section id="postures" class="postures">
-        <div class="container">
-            <h2 class="section-title">Yoga Postures & Benefits</h2>
-            <div class="postures-container">
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="adhomukhasan.jpeg" alt="Downward Facing Dog">
+        <!-- Classes Section -->
+        <section id="classes" class="classes">
+            <div class="container">
+                <h2 class="section-title">Our Classes</h2>
+                <div class="classes-container">
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Hatha Yoga">
+                        </div>
+                        <div class="class-content">
+                            <h3>Hatha Yoga</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 60 min</span>
+                                <span><i class="fas fa-user"></i> All Levels</span>
+                            </div>
+                            <p>A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners.</p>
+                            <button class="btn join-class-btn">Join Class</button>
+                        </div>
                     </div>
-                    <div class="posture-content">
-                        <h3>Downward Facing Dog (Adho Mukha Svanasana)</h3>
-                        <p class="posture-benefits">Strengthens arms and legs, stretches shoulders, hamstrings, and calves, calms the mind</p>
-                        <button class="btn">Learn More</button>
+                    
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Vinyasa Flow">
+                        </div>
+                        <div class="class-content">
+                            <h3>Vinyasa Flow</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 75 min</span>
+                                <span><i class="fas fa-user"></i> Intermediate</span>
+                            </div>
+                            <p>A dynamic practice that links movement with breath in a flowing sequence of poses.</p>
+                            <button class="btn join-class-btn">Join Class</button>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="vriksha.jpg" alt="Tree Pose">
-                    </div>
-                    <div class="posture-content">
-                        <h3>Tree Pose (Vrikshasana)</h3>
-                        <p class="posture-benefits">Improves balance, strengthens thighs, calves, and spine, stretches groins and inner thighs</p>
-                        <button class="btn">Learn More</button>
-                    </div>
-                </div>
-                
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="veera.jpg" alt="Warrior II">
-                    </div>
-                    <div class="posture-content">
-                        <h3>Warrior II (Virabhadrasana II)</h3>
-                        <p class="posture-benefits">Strengthens legs and arms, increases stamina, improves balance and concentration</p>
-                        <button class="btn">Learn More</button>
-                    </div>
-                </div>
-                
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="bala.jpg" alt="Child's Pose">
-                    </div>
-                    <div class="posture-content">
-                        <h3>Child's Pose (Balasana)</h3>
-                        <p class="posture-benefits">Gently stretches hips, thighs, and ankles, relieves back and neck pain, calms the mind</p>
-                        <button class="btn">Learn More</button>
-                    </div>
-                </div>
-                
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="bhujang.jpg" alt="Cobra Pose">
-                    </div>
-                    <div class="posture-content">
-                        <h3>Cobra Pose (Bhujangasana)</h3>
-                        <p class="posture-benefits">Strengthens the spine, stretches chest and lungs, improves flexibility of the upper and middle back</p>
-                        <button class="btn">Learn More</button>
-                    </div>
-                </div>
-                
-                <div class="posture-card">
-                    <div class="posture-image">
-                        <img src="setu.jpg" alt="Bridge Pose">
-                    </div>
-                    <div class="posture-content">
-                        <h3>Bridge Pose (Setu Bandhasana)</h3>
-                        <p class="posture-benefits">Stretches chest, neck, and spine, calms the brain, reduces anxiety, improves digestion</p>
-                        <button class="btn">Learn More</button>
+                    
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yin Yoga">
+                        </div>
+                        <div class="class-content">
+                            <h3>Yin Yoga</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 45 min</span>
+                                <span><i class="fas fa-user"></i> All Levels</span>
+                            </div>
+                            <p>A slow-paced style with poses held for longer periods to target deep connective tissues.</p>
+                            <button class="btn join-class-btn">Join Class</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials">
+        <!-- Yoga Postures Section -->
+        <section id="postures" class="postures">
+            <div class="container">
+                <h2 class="section-title">Yoga Postures & Benefits</h2>
+                <div class="postures-container">
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Downward Facing Dog">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Downward Facing Dog (Adho Mukha Svanasana)</h3>
+                            <p class="posture-benefits">Strengthens arms and legs, stretches shoulders, hamstrings, and calves, calms the mind</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                    
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tree Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Tree Pose (Vrikshasana)</h3>
+                            <p class="posture-benefits">Improves balance, strengthens thighs, calves, and spine, stretches groins and inner thighs</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                    
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Warrior II">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Warrior II (Virabhadrasana II)</h3>
+                            <p class="posture-benefits">Strengthens legs and arms, increases stamina, improves balance and concentration</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                    
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Child's Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Child's Pose (Balasana)</h3>
+                            <p class="posture-benefits">Gently stretches hips, thighs, and ankles, relieves back and neck pain, calms the mind</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                    
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cobra Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Cobra Pose (Bhujangasana)</h3>
+                            <p class="posture-benefits">Strengthens the spine, stretches chest and lungs, improves flexibility of the upper and middle back</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                    
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Bridge Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Bridge Pose (Setu Bandhasana)</h3>
+                            <p class="posture-benefits">Stretches chest, neck, and spine, calms the brain, reduces anxiety, improves digestion</p>
+                            <button class="btn">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="testimonials">
+            <div class="container">
+                <h2 class="section-title">What Our Students Say</h2>
+                <div class="testimonial-container">
+                    <div class="testimonial">
+                        <p class="testimonial-text">"Supravi Yoga has transformed my life. I've been practicing for 6 months and my flexibility, strength, and mental clarity have improved dramatically. The online classes are so convenient!"</p>
+                        <p class="testimonial-author">- Vasavi</p>
+                    </div>
+                    
+                    <div class="testimonial">
+                        <p class="testimonial-text">"The instructors at Supravi Yoga are incredible. They provide modifications for all levels and truly care about their students' progress. I've never felt stronger or more centered."</p>
+                        <p class="testimonial-author">- Sushmitha</p>
+                    </div>
+                    
+                    <div class="testimonial">
+                        <p class="testimonial-text">"As a beginner, I was nervous about starting yoga, but the welcoming environment and detailed instructions made me feel comfortable right away. Now I'm hooked!"</p>
+                        <p class="testimonial-author">- Naveen</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="dashboard">
+        <div class="dashboard-header">
+            <div class="container">
+                <h1>Welcome to Your Dashboard</h1>
+                <p id="dashboardWelcome">Manage your yoga journey</p>
+            </div>
+        </div>
+
         <div class="container">
-            <h2 class="section-title">What Our Students Say</h2>
-            <div class="testimonial-container">
-                <div class="testimonial">
-                    <p class="testimonial-text">"Supravi Yoga has transformed my life. I've been practicing for 6 months and my flexibility, strength, and mental clarity have improved dramatically. The online classes are so convenient!"</p>
-                    <p class="testimonial-author">- Vasavi</p>
+            <nav class="dashboard-nav">
+                <button class="dashboard-tab active" data-tab="classes">My Classes</button>
+                <button class="dashboard-tab" data-tab="profile">Profile</button>
+                <button class="dashboard-tab" data-tab="payments">Payment History</button>
+            </nav>
+
+            <!-- Classes Tab -->
+            <div class="dashboard-content active" id="classesTab">
+                <div class="loading" id="classesLoading">
+                    <div class="spinner"></div>
+                    <p>Loading your classes...</p>
                 </div>
-                
-                <div class="testimonial">
-                    <p class="testimonial-text">"The instructors at Supravi Yoga are incredible. They provide modifications for all levels and truly care about their students' progress. I've never felt stronger or more centered."</p>
-                    <p class="testimonial-author">- Sushmitha</p>
+                <div class="class-grid" id="userClasses">
+                    <!-- Classes will be populated dynamically -->
                 </div>
-                
-                <div class="testimonial">
-                    <p class="testimonial-text">"As a beginner, I was nervous about starting yoga, but the welcoming environment and detailed instructions made me feel comfortable right away. Now I'm hooked!"</p>
-                    <p class="testimonial-author">- Naveen</p>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="dashboard-content" id="profileTab">
+                <div class="profile-info">
+                    <h3>Profile Information</h3>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="profileName">Full Name</label>
+                            <input type="text" id="profileName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" readonly>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payments Tab -->
+            <div class="dashboard-content" id="paymentsTab">
+                <div class="payment-history">
+                    <h3>Payment History</h3>
+                    <div id="paymentList">
+                        <p>No payment history available.</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Login Modal -->
     <div class="modal" id="loginModal">
@@ -889,6 +1246,8 @@
                         <input type="password" id="loginPassword" required>
                     </div>
                     <button type="submit" class="btn" style="width: 100%;">Login</button>
+                    <div class="error-message" id="loginError"></div>
+                    <div class="success-message" id="loginSuccess"></div>
                     <div class="form-footer">
                         <p>Don't have an account? <a href="#" id="switchToSignup">Sign Up</a></p>
                     </div>
@@ -920,11 +1279,66 @@
                         <label for="signupConfirmPassword">Confirm Password</label>
                         <input type="password" id="signupConfirmPassword" required>
                     </div>
-                    <button type="submit" class="btn" style="width: 100%;">Sign Up</button>
+                    <button type="submit" class="btn" id="sendOtpBtn" style="width: 100%;">Send OTP</button>
+                    
+                    <div class="otp-section" id="otpSection">
+                        <div class="form-group">
+                            <label for="otpInput">Enter OTP</label>
+                            <input type="text" id="otpInput" class="otp-input" maxlength="6" placeholder="000000" required>
+                        </div>
+                        <button type="button" class="btn" id="verifyOtpBtn" style="width: 100%;">Verify OTP & Sign Up</button>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span class="resend-otp" id="resendOtp">Resend OTP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="error-message" id="signupError"></div>
+                    <div class="success-message" id="signupSuccess"></div>
                     <div class="form-footer">
                         <p>Already have an account? <a href="#" id="switchToLogin">Login</a></p>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="payment-info">
+                <h2>Join <span id="paymentClassName"></span></h2>
+                <div class="payment-amount">₹1</div>
+                <p>Complete the payment to unlock this class and get access to live Zoom sessions!</p>
+                
+                <div class="payment-instructions">
+                    <h4>Payment Instructions:</h4>
+                    <ol>
+                        <li>Click the "Pay Now" button below</li>
+                        <li>Complete the payment of ₹1</li>
+                        <li>Take a screenshot of the payment confirmation</li>
+                        <li>Come back to this page and click "I have completed payment"</li>
+                        <li>Your class will be unlocked automatically!</li>
+                    </ol>
+                </div>
+
+                <a href="https://razorpay.me/@smartclasses7445/1" target="_blank" class="razorpay-link">
+                    Pay Now - ₹1
+                </a>
+
+                <div style="margin: 20px 0;">
+                    <button class="btn btn-success" id="confirmPaymentBtn" style="width: 100%;">
+                        I have completed payment
+                    </button>
+                </div>
+
+                <div class="loading" id="paymentLoading">
+                    <div class="spinner"></div>
+                    <p>Processing your payment...</p>
+                </div>
+
+                <div class="error-message" id="paymentError"></div>
+                <div class="success-message" id="paymentSuccess"></div>
             </div>
         </div>
     </div>
@@ -967,7 +1381,7 @@
                 
                 <div class="footer-column">
                     <h3>Newsletter</h3>
-                    <p>Subscribe to our newsletter for updates on new classes and special offers.</p>
+                    <p>Subscribe to our newsletter for tips, updates, and special offers.</p>
                     <form>
                         <div class="form-group">
                             <input type="email" placeholder="Your Email" required>
@@ -978,116 +1392,630 @@
             </div>
             
             <div class="copyright">
-                <p>&copy; 2023 Supravi Yoga. All rights reserved.</p>
+                <p>&copy; 2025 Supravi Yoga. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu functionality
-        const menuToggle = document.getElementById('menuToggle');
-        const navLinks = document.getElementById('navLinks');
-        
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
+        // Initialize EmailJS with your service credentials
+        emailjs.init('JMF-_icoUbndhxlSq');
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtc95WGLAhBvOQT3mMAOe8yyPMcyYrffM",
+            authDomain: "supravi-yoga.firebaseapp.com",
+            projectId: "supravi-yoga",
+            storageBucket: "supravi-yoga.firebasestorage.app",
+            messagingSenderId: "849453703842",
+            appId: "1:849453703842:web:b5205883d23034c420edfb",
+            measurementId: "G-5X5L4N2GQH"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const analytics = firebase.analytics();
+
+        // Track page view
+        analytics.logEvent('page_view', {
+            page_title: 'Supravi Yoga Home',
+            page_location: window.location.href
         });
-        
-        // Close menu when clicking on a link
-        const navItems = document.querySelectorAll('.nav-links a');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-        
-        // Modal functionality
+
+        // Global variables for OTP and payment
+        let generatedOtp = '';
+        let pendingSignupData = null;
+        let currentPaymentClass = null;
+
+        // Class data with Zoom links
+        const classesData = [
+            {
+                id: 'hatha-yoga',
+                name: 'Hatha Yoga',
+                description: 'A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners.',
+                duration: '60 min',
+                level: 'All Levels',
+                price: 1,
+                image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                zoomLink: 'https://zoom.us/j/1234567890?pwd=example1'
+            },
+            {
+                id: 'vinyasa-flow',
+                name: 'Vinyasa Flow',
+                description: 'A dynamic practice that links movement with breath in a flowing sequence of poses.',
+                duration: '75 min',
+                level: 'Intermediate',
+                price: 1,
+                image: 'https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                zoomLink: 'https://zoom.us/j/1234567891?pwd=example2'
+            },
+            {
+                id: 'yin-yoga',
+                name: 'Yin Yoga',
+                description: 'A slow-paced style with poses held for longer periods to target deep connective tissues.',
+                duration: '45 min',
+                level: 'All Levels',
+                price: 1,
+                image: 'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                zoomLink: 'https://zoom.us/j/1234567892?pwd=example3'
+            }
+        ];
+
+        // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
         const signupBtn = document.getElementById('signupBtn');
         const mobileLoginBtn = document.getElementById('mobileLoginBtn');
         const mobileSignupBtn = document.getElementById('mobileSignupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const dashboardBtn = document.getElementById('dashboardBtn');
         const loginModal = document.getElementById('loginModal');
         const signupModal = document.getElementById('signupModal');
+        const paymentModal = document.getElementById('paymentModal');
         const closeModalButtons = document.querySelectorAll('.close-modal');
-        const switchToSignup = document.getElementById('switchToSignup');
         const switchToLogin = document.getElementById('switchToLogin');
-        
-        loginBtn.addEventListener('click', () => {
-            loginModal.style.display = 'flex';
-        });
-        
-        signupBtn.addEventListener('click', () => {
-            signupModal.style.display = 'flex';
-        });
-        
-        mobileLoginBtn.addEventListener('click', () => {
-            loginModal.style.display = 'flex';
-            navLinks.classList.remove('active');
-        });
-        
-        mobileSignupBtn.addEventListener('click', () => {
-            signupModal.style.display = 'flex';
-            navLinks.classList.remove('active');
-        });
-        
-        closeModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                loginModal.style.display = 'none';
-                signupModal.style.display = 'none';
+        const switchToSignup = document.getElementById('switchToSignup');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginError = document.getElementById('loginError');
+        const loginSuccess = document.getElementById('loginSuccess');
+        const signupError = document.getElementById('signupError');
+        const signupSuccess = document.getElementById('signupSuccess');
+        const authButtons = document.getElementById('authButtons');
+        const userMenu = document.getElementById('userMenu');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        const otpSection = document.getElementById('otpSection');
+        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+        const otpInput = document.getElementById('otpInput');
+        const resendOtp = document.getElementById('resendOtp');
+
+        // Dashboard elements
+        const landingPage = document.getElementById('landingPage');
+        const userDashboard = document.getElementById('userDashboard');
+        const dashboardTabs = document.querySelectorAll('.dashboard-tab');
+        const dashboardContents = document.querySelectorAll('.dashboard-content');
+        const userClasses = document.getElementById('userClasses');
+        const classesLoading = document.getElementById('classesLoading');
+
+        // Payment elements
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const paymentLoading = document.getElementById('paymentLoading');
+        const paymentError = document.getElementById('paymentError');
+        const paymentSuccess = document.getElementById('paymentSuccess');
+
+        // Generate random OTP
+        function generateOtp() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Send OTP via EmailJS
+        function sendOtpEmail(email, name, otp) {
+            const templateParams = {
+                to_email: email,
+                to_name: name,
+                otp_code: otp,
+                from_name: 'Supravi Yoga'
+            };
+
+            return emailjs.send('service_w4px03n', 'template_0lwjboh', templateParams);
+        }
+
+        // Initialize user data in Firestore
+        async function initializeUserData(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // Create user document with initial data
+                    await db.collection('users').doc(user.uid).set({
+                        name: user.displayName || '',
+                        email: user.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        unlockedClasses: [],
+                        paymentHistory: []
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing user data:', error);
+            }
+        }
+
+        // Get user's unlocked classes
+        async function getUserUnlockedClasses(userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    return userDoc.data().unlockedClasses || [];
+                }
+                return [];
+            } catch (error) {
+                console.error('Error getting unlocked classes:', error);
+                return [];
+            }
+        }
+
+        // Unlock a class for user
+        async function unlockClassForUser(userId, classId) {
+            try {
+                const userRef = db.collection('users').doc(userId);
+                
+                await userRef.update({
+                    unlockedClasses: firebase.firestore.FieldValue.arrayUnion(classId),
+                    paymentHistory: firebase.firestore.FieldValue.arrayUnion({
+                        classId: classId,
+                        className: classesData.find(c => c.id === classId)?.name || 'Unknown',
+                        amount: 1,
+                        date: firebase.firestore.FieldValue.serverTimestamp(),
+                        paymentMethod: 'Razorpay'
+                    })
+                });
+
+                analytics.logEvent('class_unlocked', {
+                    user_id: userId,
+                    class_id: classId
+                });
+
+                return true;
+            } catch (error) {
+                console.error('Error unlocking class:', error);
+                return false;
+            }
+        }
+
+        // Show/Hide Dashboard
+        function showDashboard() {
+            landingPage.style.display = 'none';
+            userDashboard.classList.add('active');
+            loadUserDashboard();
+        }
+
+        function showLandingPage() {
+            landingPage.style.display = 'block';
+            userDashboard.classList.remove('active');
+        }
+
+        // Load user dashboard data
+        async function loadUserDashboard() {
+            if (!auth.currentUser) return;
+
+            classesLoading.style.display = 'block';
+            const unlockedClasses = await getUserUnlockedClasses(auth.currentUser.uid);
+            
+            // Render classes
+            userClasses.innerHTML = '';
+            
+            classesData.forEach(classData => {
+                const isUnlocked = unlockedClasses.includes(classData.id);
+                
+                const classCard = document.createElement('div');
+                classCard.className = 'dashboard-class-card';
+                classCard.innerHTML = `
+                    <img src="${classData.image}" alt="${classData.name}">
+                    <div class="dashboard-card-content">
+                        <span class="class-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
+                            ${isUnlocked ? 'Unlocked' : 'Locked'}
+                        </span>
+                        <h3>${classData.name}</h3>
+                        <p>${classData.description}</p>
+                        <div class="class-info">
+                            <span><i class="far fa-clock"></i> ${classData.duration}</span>
+                            <span><i class="fas fa-user"></i> ${classData.level}</span>
+                        </div>
+                        <div class="class-price">₹${classData.price}</div>
+                        ${isUnlocked ? 
+                            `<a href="${classData.zoomLink}" target="_blank" class="zoom-link">
+                                <i class="fas fa-video"></i> Join Zoom Class
+                            </a>` :
+                            `<button class="btn unlock-class-btn" data-class-id="${classData.id}">
+                                Join Now - ₹${classData.price}
+                            </button>`
+                        }
+                    </div>
+                `;
+                
+                userClasses.appendChild(classCard);
             });
+
+            // Add event listeners to unlock buttons
+            document.querySelectorAll('.unlock-class-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const classId = e.target.getAttribute('data-class-id');
+                    showPaymentModal(classId);
+                });
+            });
+
+            classesLoading.style.display = 'none';
+
+            // Update profile info
+            document.getElementById('profileName').value = auth.currentUser.displayName || '';
+            document.getElementById('profileEmail').value = auth.currentUser.email || '';
+        }
+
+        // Show payment modal
+        function showPaymentModal(classId) {
+            const classData = classesData.find(c => c.id === classId);
+            if (!classData) return;
+
+            currentPaymentClass = classId;
+            document.getElementById('paymentClassName').textContent = classData.name;
+            paymentModal.style.display = 'flex';
+            
+            // Reset modal state
+            paymentLoading.style.display = 'none';
+            paymentError.style.display = 'none';
+            paymentSuccess.style.display = 'none';
+            confirmPaymentBtn.disabled = false;
+
+            analytics.logEvent('payment_modal_opened', {
+                class_id: classId,
+                class_name: classData.name
+            });
+        }
+
+        // Toggle Mobile Menu
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
         });
-        
-        switchToSignup.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginModal.style.display = 'none';
-            signupModal.style.display = 'flex';
-        });
-        
-        switchToLogin.addEventListener('click', (e) => {
-            e.preventDefault();
+
+        // Show Login Modal
+        const showLoginModal = () => {
             signupModal.style.display = 'none';
             loginModal.style.display = 'flex';
+            navLinks.classList.remove('active');
+            analytics.logEvent('login_attempt_started');
+        };
+
+        // Show Signup Modal
+        const showSignupModal = () => {
+            loginModal.style.display = 'none';
+            signupModal.style.display = 'flex';
+            navLinks.classList.remove('active');
+            otpSection.style.display = 'none';
+            sendOtpBtn.textContent = 'Send OTP';
+            analytics.logEvent('signup_attempt_started');
+        };
+
+        // Close Modal
+        const closeModal = () => {
+            loginModal.style.display = 'none';
+            signupModal.style.display = 'none';
+            paymentModal.style.display = 'none';
+            otpSection.style.display = 'none';
+            sendOtpBtn.textContent = 'Send OTP';
+            generatedOtp = '';
+            pendingSignupData = null;
+            currentPaymentClass = null;
+        };
+
+        // Event Listeners
+        loginBtn.addEventListener('click', showLoginModal);
+        signupBtn.addEventListener('click', showSignupModal);
+        mobileLoginBtn.addEventListener('click', showLoginModal);
+        mobileSignupBtn.addEventListener('click', showSignupModal);
+        switchToLogin.addEventListener('click', showLoginModal);
+        switchToSignup.addEventListener('click', showSignupModal);
+
+        dashboardBtn.addEventListener('click', showDashboard);
+
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', closeModal);
         });
-        
+
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === loginModal) {
-                loginModal.style.display = 'none';
-            }
-            if (e.target === signupModal) {
-                signupModal.style.display = 'none';
-            }
+            if (e.target === loginModal) closeModal();
+            if (e.target === signupModal) closeModal();
+            if (e.target === paymentModal) closeModal();
         });
-        
-        // Form submission
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Login functionality would be implemented here. Redirecting to dashboard.');
-            loginModal.style.display = 'none';
-            // In a real application, you would authenticate and redirect
+
+        // Dashboard tabs
+        dashboardTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                dashboardTabs.forEach(t => t.classList.remove('active'));
+                dashboardContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(targetTab + 'Tab').classList.add('active');
+            });
         });
-        
-        document.getElementById('signupForm').addEventListener('submit', (e) => {
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            loginError.style.display = 'none';
+            loginSuccess.style.display = 'none';
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    loginSuccess.textContent = 'Login successful!';
+                    loginSuccess.style.display = 'block';
+                    analytics.logEvent('login', {
+                        method: 'email'
+                    });
+                    setTimeout(() => {
+                        closeModal();
+                        showDashboard();
+                    }, 1500);
+                })
+                .catch((error) => {
+                    loginError.textContent = error.message;
+                    loginError.style.display = 'block';
+                    analytics.logEvent('login_failed', {
+                        error_code: error.code
+                    });
+                });
+        });
+
+        // Send OTP Button Click
+        sendOtpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
             const confirmPassword = document.getElementById('signupConfirmPassword').value;
             
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+            signupError.style.display = 'none';
+            signupSuccess.style.display = 'none';
+            
+            // Validation
+            if (!name || !email || !password || !confirmPassword) {
+                signupError.textContent = 'Please fill in all fields';
+                signupError.style.display = 'block';
                 return;
             }
             
-            alert('Signup functionality would be implemented here. Account created successfully!');
-            signupModal.style.display = 'none';
-            // In a real application, you would create the account
+            if (password !== confirmPassword) {
+                signupError.textContent = 'Passwords do not match';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                signupError.textContent = 'Password should be at least 6 characters';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            // Store signup data for later use
+            pendingSignupData = { name, email, password };
+            
+            // Generate and send OTP
+            generatedOtp = generateOtp();
+            sendOtpBtn.textContent = 'Sending OTP...';
+            sendOtpBtn.disabled = true;
+            
+            sendOtpEmail(email, name, generatedOtp)
+                .then((response) => {
+                    signupSuccess.textContent = 'OTP sent successfully! Check your email.';
+                    signupSuccess.style.display = 'block';
+                    otpSection.style.display = 'block';
+                    sendOtpBtn.textContent = 'OTP Sent';
+                    analytics.logEvent('otp_sent', {
+                        email: email
+                    });
+                })
+                .catch((error) => {
+                    signupError.textContent = 'Failed to send OTP. Please try again.';
+                    signupError.style.display = 'block';
+                    sendOtpBtn.textContent = 'Send OTP';
+                    sendOtpBtn.disabled = false;
+                    console.error('EmailJS Error:', error);
+                });
         });
-        
-        // Join class buttons
-        const joinButtons = document.querySelectorAll('.class-card .btn');
-        joinButtons.forEach(button => {
+
+        // Verify OTP and Sign Up
+        verifyOtpBtn.addEventListener('click', () => {
+            const enteredOtp = otpInput.value.trim();
+            
+            signupError.style.display = 'none';
+            signupSuccess.style.display = 'none';
+            
+            if (!enteredOtp) {
+                signupError.textContent = 'Please enter the OTP';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            if (enteredOtp !== generatedOtp) {
+                signupError.textContent = 'Invalid OTP. Please try again.';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            // OTP verified, proceed with Firebase signup
+            if (!pendingSignupData) {
+                signupError.textContent = 'Session expired. Please try again.';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            verifyOtpBtn.textContent = 'Creating Account...';
+            verifyOtpBtn.disabled = true;
+            
+            auth.createUserWithEmailAndPassword(pendingSignupData.email, pendingSignupData.password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return user.updateProfile({
+                        displayName: pendingSignupData.name
+                    });
+                })
+                .then(() => {
+                    // Initialize user data in Firestore
+                    return initializeUserData(auth.currentUser);
+                })
+                .then(() => {
+                    signupSuccess.textContent = 'Account created successfully!';
+                    signupSuccess.style.display = 'block';
+                    analytics.logEvent('sign_up', {
+                        method: 'email'
+                    });
+                    setTimeout(() => {
+                        closeModal();
+                        showDashboard();
+                    }, 1500);
+                })
+                .catch((error) => {
+                    signupError.textContent = error.message;
+                    signupError.style.display = 'block';
+                    verifyOtpBtn.textContent = 'Verify OTP & Sign Up';
+                    verifyOtpBtn.disabled = false;
+                    analytics.logEvent('signup_failed', {
+                        error_code: error.code
+                    });
+                });
+        });
+
+        // Resend OTP
+        resendOtp.addEventListener('click', () => {
+            if (!pendingSignupData) {
+                signupError.textContent = 'Session expired. Please try again.';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            generatedOtp = generateOtp();
+            resendOtp.textContent = 'Sending...';
+            
+            sendOtpEmail(pendingSignupData.email, pendingSignupData.name, generatedOtp)
+                .then((response) => {
+                    signupSuccess.textContent = 'New OTP sent successfully!';
+                    signupSuccess.style.display = 'block';
+                    resendOtp.textContent = 'Resend OTP';
+                    analytics.logEvent('otp_resent', {
+                        email: pendingSignupData.email
+                    });
+                })
+                .catch((error) => {
+                    signupError.textContent = 'Failed to resend OTP. Please try again.';
+                    signupError.style.display = 'block';
+                    resendOtp.textContent = 'Resend OTP';
+                    console.error('EmailJS Error:', error);
+                });
+        });
+
+        // Confirm Payment
+        confirmPaymentBtn.addEventListener('click', async () => {
+            if (!currentPaymentClass || !auth.currentUser) return;
+
+            paymentError.style.display = 'none';
+            paymentSuccess.style.display = 'none';
+            paymentLoading.style.display = 'block';
+            confirmPaymentBtn.disabled = true;
+
+            try {
+                const success = await unlockClassForUser(auth.currentUser.uid, currentPaymentClass);
+                
+                if (success) {
+                    paymentSuccess.textContent = 'Payment confirmed! Class unlocked successfully!';
+                    paymentSuccess.style.display = 'block';
+                    
+                    analytics.logEvent('payment_completed', {
+                        class_id: currentPaymentClass,
+                        user_id: auth.currentUser.uid,
+                        amount: 1
+                    });
+
+                    setTimeout(() => {
+                        closeModal();
+                        loadUserDashboard();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to unlock class');
+                }
+            } catch (error) {
+                paymentError.textContent = 'Failed to confirm payment. Please try again.';
+                paymentError.style.display = 'block';
+                confirmPaymentBtn.disabled = false;
+                console.error('Payment confirmation error:', error);
+            }
+
+            paymentLoading.style.display = 'none';
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+            analytics.logEvent('logout');
+        });
+
+        // Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'flex';
+                userName.textContent = user.displayName || user.email;
+                userAvatar.textContent = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+                
+                // Initialize user data if needed
+                initializeUserData(user);
+                
+                analytics.logEvent('user_authenticated', {
+                    user_id: user.uid
+                });
+            } else {
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+                showLandingPage();
+            }
+        });
+
+        // Join Class Buttons - Require Authentication
+        document.querySelectorAll('.join-class-btn').forEach(button => {
             button.addEventListener('click', () => {
-                alert('Please login to access our classes.');
-                loginModal.style.display = 'flex';
+                if (auth.currentUser) {
+                    showDashboard();
+                } else {
+                    showLoginModal();
+                }
             });
+        });
+
+        // Track button clicks for analytics
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', () => {
+                analytics.logEvent('button_click', {
+                    button_text: button.textContent,
+                    page_location: window.location.href
+                });
+            });
+        });
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            showLandingPage();
         });
     </script>
 </body>
