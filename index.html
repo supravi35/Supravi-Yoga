@@ -97,6 +97,14 @@
             transform: none;
             background-color: #6c757d;
         }
+
+        .btn-danger {
+            background-color: var(--accent);
+        }
+
+        .btn-danger:hover {
+            background-color: #e55555;
+        }
         
         section {
             padding: 80px 0;
@@ -139,15 +147,26 @@
         
         .logo {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
             text-decoration: none;
+            flex: 1;
         }
         
         .logo-text {
-            font-size: 1.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--primary);
-            margin-left: 10px;
+            line-height: 1;
+        }
+
+        .logo-tagline {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            font-weight: 300;
+            align-self: flex-end;
+            margin-top: -5px;
         }
         
         .nav-links {
@@ -170,18 +189,17 @@
             color: var(--primary);
         }
         
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
+        .auth-menu {
+            display: none;
         }
         
-        .user-menu {
+        .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
         }
         
-        .user-info {
+        .user-profile {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -197,6 +215,31 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .admin-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .online-count {
+            background: var(--secondary);
+            color: var(--dark);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
         }
         
         /* Mobile Menu */
@@ -215,6 +258,13 @@
             background-color: var(--primary);
             border-radius: 5px;
             transition: all 0.3s ease;
+        }
+
+        .mobile-auth {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
         }
         
         /* Hero Section */
@@ -247,8 +297,8 @@
         /* Dashboard Styles */
         .dashboard {
             display: none;
-            padding-top: 100px;
             min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .dashboard.active {
@@ -256,42 +306,233 @@
         }
 
         .dashboard-header {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), #2d5a4a);
             color: white;
-            padding: 30px 0;
+            padding: 40px 0;
             text-align: center;
-            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: floatBackground 20s linear infinite;
+        }
+
+        @keyframes floatBackground {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .dashboard-title {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            text-align: left;
+        }
+
+        .dashboard-logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-tagline {
+            font-size: 1rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .dashboard-user-info {
+            position: relative;
+            z-index: 2;
+            text-align: right;
+        }
+
+        .dashboard-user-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
 
         .dashboard-nav {
+            background: white;
+            border-radius: 15px;
+            margin: 30px 0;
+            padding: 10px;
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 40px;
-            border-bottom: 1px solid #ddd;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 20px;
         }
 
         .dashboard-nav button {
             background: none;
             border: none;
-            padding: 15px 20px;
+            padding: 15px 25px;
             font-size: 1.1rem;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
+            border-radius: 10px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .dashboard-nav button.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .dashboard-nav button:hover:not(.active) {
+            background: #f0f0f0;
         }
 
         .dashboard-content {
             display: none;
+            background: white;
+            margin: 20px 0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .dashboard-content.active {
             display: block;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .admin-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .admin-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-form input, .admin-form select, .admin-form textarea {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-form button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-form button:hover {
+            background: #f0f0f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Yoga Quotes Slider */
+        .yoga-quotes-container {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .yoga-quote {
+            color: white;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.1rem;
+            display: none;
+            animation: fadeInOut 6s ease-in-out infinite;
+        }
+
+        .yoga-quote.active {
+            display: block;
+        }
+
+        .yoga-quote .quote-text {
+            margin-bottom: 10px;
+        }
+
+        .yoga-quote .quote-author {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
         }
 
         .class-grid {
@@ -303,14 +544,15 @@
 
         .dashboard-class-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dashboard-class-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .dashboard-class-card img {
@@ -325,7 +567,7 @@
 
         .class-status {
             display: inline-block;
-            padding: 5px 15px;
+            padding: 8px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: bold;
@@ -352,15 +594,149 @@
         .zoom-link {
             background: var(--success);
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 25px;
             text-decoration: none;
             display: inline-block;
             margin-top: 10px;
+            transition: all 0.3s ease;
         }
 
         .zoom-link:hover {
             background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .admin-zoom-link {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-zoom-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-edit-mode .form-group input {
+            border: 2px solid var(--primary);
+            background: #f8f9fa;
+        }
+
+        .profile-edit-mode .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 142, 124, 0.1);
+        }
+        
+        /* About Section - Curved Box Design */
+        .about {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none"><path d="M421.9,6.5c22.6-2.5,51.5,0.4,75.5,5.3c23.6,4.9,70.9,23.5,100.5,35.7c75.8,32.2,133.7,44.5,192.6,49.7c23.6,2.1,48.7,3.5,103.4-2.5c54.7-6,106.2-25.6,106.2-25.6V0H0v30.3c0,0,72,32.6,158.4,30.5c39.2-0.7,92.8-6.7,134-22.4c21.2-8.1,52.2-18.2,79.7-24.2C399.3,7.9,411.6,7.5,421.9,6.5z" fill="rgba(255,255,255,0.1)"/></svg>') no-repeat center top;
+            background-size: cover;
+        }
+
+        .about-curved-container {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--dark);
+            margin: 40px 0;
+            padding: 40px;
+            border-radius: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-curved-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(74, 142, 124, 0.1), transparent);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .about-curved-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .about-text {
+            flex: 1;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+        
+        .about-image {
+            flex: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .about-image:hover img {
+            transform: scale(1.05);
         }
         
         /* Certificates Section */
@@ -415,35 +791,6 @@
         .certificate-content p {
             color: #666;
             line-height: 1.6;
-        }
-
-        /* About Section */
-        .about-content {
-            display: flex;
-            align-items: center;
-            gap: 50px;
-        }
-        
-        .about-text {
-            flex: 1;
-        }
-        
-        .about-image {
-            flex: 1;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .about-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 0.5s ease;
-        }
-        
-        .about-image:hover img {
-            transform: scale(1.05);
         }
         
         /* Benefits Section */
@@ -694,12 +1041,18 @@
             font-weight: 500;
         }
         
-        .form-group input {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
         }
         
         .form-footer {
@@ -915,23 +1268,32 @@
                 display: flex;
             }
             
-            .auth-buttons {
-                display: none;
-            }
-            
             .mobile-auth {
                 display: flex;
-                gap: 10px;
-                margin-top: 20px;
             }
             
-            .user-menu {
+            .user-info {
                 display: none;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dashboard-user-info {
+                text-align: center;
+                margin-top: 20px;
             }
 
             .dashboard-nav {
                 flex-direction: column;
-                gap: 0;
+                gap: 10px;
+            }
+
+            .dashboard-tabs {
+                flex-direction: column;
+                width: 100%;
             }
 
             .class-grid {
@@ -943,6 +1305,10 @@
             .navbar {
                 flex-direction: row;
                 padding: 15px 0;
+            }
+
+            .logo-text {
+                font-size: 2rem;
             }
             
             .hero {
@@ -962,8 +1328,17 @@
                 font-size: 2rem;
             }
             
-            .mobile-auth {
-                flex-direction: column;
+            .about-curved-container {
+                margin: 20px 0;
+                padding: 30px 20px;
+            }
+
+            .about-curved-title {
+                font-size: 2rem;
+            }
+
+            .dashboard-logo {
+                font-size: 2rem;
             }
         }
     </style>
@@ -979,36 +1354,34 @@
                     <span></span>
                 </div>
                 
-                <a href="#" class="logo">
+                <a href="#" class="logo" onclick="showLandingPage()">
                     <span class="logo-text">Supravi Yoga</span>
+                    <span class="logo-tagline">- Essence of Life</span>
                 </a>
                 
                 <ul class="nav-links" id="navLinks">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#certificates">Certificates</a></li>
-                    <li><a href="#benefits">Benefits</a></li>
-                    <li><a href="#classes">Classes</a></li>
-                    <li><a href="#postures">Postures</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#home" onclick="showLandingPage()">Home</a></li>
+                    <li><a href="#about" onclick="showLandingPage()">About</a></li>
+                    <li><a href="#certificates" onclick="showLandingPage()">Certificates</a></li>
+                    <li><a href="#benefits" onclick="showLandingPage()">Benefits</a></li>
+                    <li><a href="#classes" onclick="showLandingPage()">Classes</a></li>
+                    <li><a href="#postures" onclick="showLandingPage()">Postures</a></li>
+                    <li><a href="#testimonials" onclick="showLandingPage()">Testimonials</a></li>
                     <div class="mobile-auth">
                         <button class="btn" id="mobileLoginBtn">Login</button>
                         <button class="btn btn-secondary" id="mobileSignupBtn">Sign Up</button>
                     </div>
                 </ul>
                 
-                <div class="auth-buttons" id="authButtons">
-                    <button class="btn" id="loginBtn">Login</button>
-                    <button class="btn btn-secondary" id="signupBtn">Sign Up</button>
-                </div>
-                
-                <div class="user-menu" id="userMenu" style="display: none;">
-                    <div class="user-info">
+                <div class="user-info" id="userInfo" style="display: none;">
+                    <div class="user-profile">
                         <div class="user-avatar" id="userAvatar"></div>
-                        <span id="userName"></span>
+                        <div>
+                            <div class="user-name" id="userName"></div>
+                            <span id="adminIndicator" class="admin-indicator" style="display: none;">ADMIN</span>
+                            <span id="onlineCount" class="online-count" style="display: none;"></span>
+                        </div>
                     </div>
-                    <button class="btn" id="dashboardBtn">Dashboard</button>
-                    <button class="btn" id="logoutBtn">Logout</button>
                 </div>
             </nav>
         </div>
@@ -1030,13 +1403,17 @@
         <!-- About Section -->
         <section id="about" class="about">
             <div class="container">
-                <h2 class="section-title">About Supravi Yoga</h2>
-                <div class="about-content">
-                    <div class="about-text">
-                        <p>Supravi Yoga is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by Yoga Coach Chowdary Charitha, our studio brings together traditional wisdom and modern approaches to wellness.</p>
-                        <p>We believe that yoga is for everyone - regardless of age, fitness level, or experience.</p>
-            <p>At Supravi Yoga, we offer a variety of styles including Hatha, Ashtanga-Vinyasa, and specialized yoga classes. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
-                    </div>
+                <div class="about-curved-container">
+                    <h2 class="about-curved-title">About Supravi Yoga</h2>
+                    <div class="about-content">
+                        <div class="about-text">
+                            <p><strong>Supravi Yoga</strong> is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by <strong>Yoga Coach Chowdary Charitha</strong>, our studio brings together traditional wisdom and modern approaches to wellness.</p>
+                            <p>We believe that <strong>yoga is for everyone</strong> - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
+                            <p>At <strong>Supravi Yoga</strong>, we offer a variety of styles including <strong>Hatha, Ashtanga-Vinyasa, and specialized yoga classes</strong>. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
+                        </div>
+                        <div class="about-image">
+                            <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1049,31 +1426,31 @@
                 <div class="certificates-container">
                     <div class="certificate-card">
                         <div class="certificate-image">
-                            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Alliance Certification">
+                            <img src="200.jpg" alt="Yoga Alliance Certification">
                         </div>
                         <div class="certificate-content">
-                            <h3>Yoga Alliance RYT-500 Certification</h3>
-                            <p>Registered Yoga Teacher with 500-hour certification from Yoga Alliance, ensuring the highest standards of yoga instruction and practice.</p>
+                            <h3>Bodhi Yoga RYT-200 Certification</h3>
+                            <p>Registered Yoga Teacher with 200-hour certification from Bodhi Yoga,Yoga Alliance ensuring the highest standards of yoga instruction and practice.</p>
                         </div>
                     </div>
                     
                     <div class="certificate-card">
                         <div class="certificate-image">
-                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Excellence in Yoga Award">
+                            <img src="bt.jpg" alt="Excellence in Yoga Award">
                         </div>
                         <div class="certificate-content">
-                            <h3>Excellence in Yoga Teaching Award 2024</h3>
+                            <h3>Excellence in Yoga Teaching Award 2023</h3>
                             <p>Recognized for outstanding contribution to yoga education and innovative teaching methodologies in the wellness community.</p>
                         </div>
                     </div>
                     
                     <div class="certificate-card">
                         <div class="certificate-image">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Meditation Certification">
+                            <img src="bst.jpg" alt="Meditation Certification">
                         </div>
                         <div class="certificate-content">
-                            <h3>Advanced Meditation & Mindfulness Certification</h3>
-                            <p>Specialized certification in meditation techniques and mindfulness practices, enhancing the holistic yoga experience for all students.</p>
+                            <h3>Advanced Meditation & Mindfulness </h3>
+                            <p>Best Student in meditation techniques and mindfulness practices, enhancing the holistic yoga experience for all students.</p>
                         </div>
                     </div>
                 </div>
@@ -1196,7 +1573,7 @@
                 <div class="postures-container">
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="adhomukhasan.jpg" alt="Downward Facing Dog">
+                            <img src="adhomukhasan.jpeg" alt="Downward Facing Dog">
                         </div>
                         <div class="posture-content">
                             <h3>Downward Facing Dog (Adho Mukha Svanasana)</h3>
@@ -1309,17 +1686,105 @@
     <div id="userDashboard" class="dashboard">
         <div class="dashboard-header">
             <div class="container">
-                <h1>Supravi Yoga</h1>
-                <p id="dashboardWelcome">Welcome to your yoga journey</p>
+                <div class="dashboard-title">
+                    <div class="dashboard-logo">Supravi Yoga</div>
+                    <div class="dashboard-tagline">- Essence of Life</div>
+                </div>
+                <div class="dashboard-user-info">
+                    <div class="dashboard-user-name" id="dashboardUserName"></div>
+                    <button class="btn btn-danger logout-btn" id="dashboardLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="container">
+            <!-- Welcome Message -->
+            <div style="background: rgba(255, 255, 255, 0.9); padding: 25px; border-radius: 15px; margin: 20px 0; text-align: center; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">🙏 Welcome to Your Yoga Journey!</h3>
+                <p style="color: #555; font-size: 1.1rem;">Namaste! Ready to find your inner peace and strength? Your personalized yoga experience awaits below.</p>
+            </div>
+
+            <!-- Admin Panel (only visible to admins) -->
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <h3 class="admin-title">🔥 Admin Control Panel 🔥</h3>
+                <div class="admin-controls">
+                    <div class="admin-section">
+                        <h4>📊 Statistics</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalUsers">0</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="onlineUsers">0</div>
+                                <div class="stat-label">Online Now</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalClasses">3</div>
+                                <div class="stat-label">Total Classes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4>➕ Add New Class</h4>
+                        <form class="admin-form" id="addClassForm">
+                            <input type="text" id="className" placeholder="Class Name" required>
+                            <textarea id="classDescription" placeholder="Class Description" rows="3" required></textarea>
+                            <input type="text" id="classDuration" placeholder="Duration (e.g., 60 min)" required>
+                            <input type="text" id="classLevel" placeholder="Level (e.g., Beginner)" required>
+                            <input type="number" id="classPrice" placeholder="Price" min="1" required>
+                            <input type="url" id="classImage" placeholder="Image URL" required>
+                            <input type="url" id="classZoomLink" placeholder="Zoom Link" required>
+                            <button type="submit">Add Class</button>
+                        </form>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4>🔗 Update Zoom Links</h4>
+                        <form class="admin-form" id="updateZoomForm">
+                            <select id="zoomClassSelect" required>
+                                <option value="">Select a class</option>
+                            </select>
+                            <input type="url" id="newZoomLink" placeholder="New Zoom Link" required>
+                            <button type="submit">Update Zoom Link</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yoga Quotes Slider -->
+            <div class="yoga-quotes-container">
+                <div class="yoga-quote active">
+                    <div class="quote-text">"Yoga is not about touching your toes. It is about what you learn on the way down."</div>
+                    <div class="quote-author">- Judith Hanson Lasater</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"The success of yoga lies not in the ability to attain the pose, but in how it makes us better human beings."</div>
+                    <div class="quote-author">- B.K.S. Iyengar</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"Yoga is a light, which once lit will never dim. The better your practice, the brighter your flame."</div>
+                    <div class="quote-author">- B.K.S. Iyengar</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"The nature of yoga is to shine the light of awareness into the darkest corners of the body."</div>
+                    <div class="quote-author">- Jason Crandell</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"Yoga is not a work-out, it is a work-in. And this is the point of spiritual practice; to make us teachable."</div>
+                    <div class="quote-author">- Rolf Gates</div>
+                </div>
+            </div>
+
             <nav class="dashboard-nav">
-                <button class="dashboard-tab active" data-tab="classes">My Classes</button>
-                <button class="dashboard-tab" data-tab="profile">Profile</button>
-                <button class="dashboard-tab" data-tab="payments">Payment History</button>
-                <button class="btn" id="dashboardLogoutBtn" style="margin-left: auto;">Logout</button>
+                <div class="dashboard-tabs">
+                    <button class="dashboard-tab active" data-tab="classes">My Classes</button>
+                    <button class="dashboard-tab" data-tab="profile">Profile</button>
+                    <button class="dashboard-tab" data-tab="payments">Payment History</button>
+                </div>
             </nav>
 
             <!-- Classes Tab -->
@@ -1335,17 +1800,19 @@
 
             <!-- Profile Tab -->
             <div class="dashboard-content" id="profileTab">
-                <div class="profile-info">
+                <div class="profile-section">
                     <h3>Profile Information</h3>
                     <form id="profileForm">
                         <div class="form-group">
                             <label for="profileName">Full Name</label>
-                            <input type="text" id="profileName" readonly>
+                            <input type="text" id="profileName" placeholder="Enter your full name">
+                            <small style="color: #666; font-size: 0.9rem;">Click to edit your name</small>
                         </div>
                         <div class="form-group">
                             <label for="profileEmail">Email</label>
                             <input type="email" id="profileEmail" readonly>
                         </div>
+                        <button type="button" class="btn" id="saveProfileBtn" style="display: none;">Save Changes</button>
                     </form>
                 </div>
             </div>
@@ -1476,7 +1943,7 @@
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer id="mainFooter">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
@@ -1493,13 +1960,13 @@
                 <div class="footer-column">
                     <h3>Quick Links</h3>
                     <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#certificates">Certificates</a></li>
-                        <li><a href="#benefits">Benefits</a></li>
-                        <li><a href="#classes">Classes</a></li>
-                        <li><a href="#postures">Postures</a></li>
-                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#home" onclick="showLandingPage()">Home</a></li>
+                        <li><a href="#about" onclick="showLandingPage()">About</a></li>
+                        <li><a href="#certificates" onclick="showLandingPage()">Certificates</a></li>
+                        <li><a href="#benefits" onclick="showLandingPage()">Benefits</a></li>
+                        <li><a href="#classes" onclick="showLandingPage()">Classes</a></li>
+                        <li><a href="#postures" onclick="showLandingPage()">Postures</a></li>
+                        <li><a href="#testimonials" onclick="showLandingPage()">Testimonials</a></li>
                     </ul>
                 </div>
                 
@@ -1557,13 +2024,108 @@
             page_location: window.location.href
         });
 
+        // Admin emails
+        const adminEmails = ['supraviyoga@gmail.com', 'vishallnareddy@gmail.com'];
+
         // Global variables for OTP and payment
         let generatedOtp = '';
         let pendingSignupData = null;
         let currentPaymentClass = null;
+        let currentUser = null;
+        let isAdmin = false;
 
-        // Class data with Zoom links
-        const classesData = [
+        // Yoga quotes rotation
+        const yogaQuotes = [
+            {
+                text: "Yoga is not about touching your toes. It is about what you learn on the way down.",
+                author: "Judith Hanson Lasater"
+            },
+            {
+                text: "The success of yoga lies not in the ability to attain the pose, but in how it makes us better human beings.",
+                author: "B.K.S. Iyengar"
+            },
+            {
+                text: "Yoga is a light, which once lit will never dim. The better your practice, the brighter your flame.",
+                author: "B.K.S. Iyengar"
+            },
+            {
+                text: "The nature of yoga is to shine the light of awareness into the darkest corners of the body.",
+                author: "Jason Crandell"
+            },
+            {
+                text: "Yoga is not a work-out, it is a work-in. And this is the point of spiritual practice; to make us teachable.",
+                author: "Rolf Gates"
+            },
+            {
+                text: "Yoga means union, the union of body, mind, and spirit. It's about connecting with your true self.",
+                author: "Traditional Wisdom"
+            },
+            {
+                text: "The ultimate goal of yoga is to always observe things as they are, and to allow everything to exist as it is.",
+                author: "Kausthub Desikachar"
+            },
+            {
+                text: "Yoga is a way of moving into stillness in order to experience the truth of who you are.",
+                author: "Erich Schiffmann"
+            },
+            {
+                text: "In truth, yoga doesn't take time – it gives time.",
+                author: "Ganga White"
+            },
+            {
+                text: "Yoga is not about self-improvement, it's about self-acceptance.",
+                author: "Gurmukh Kaur Khalsa"
+            },
+            {
+                text: "The word 'yoga' comes from 'yuj' meaning to unite or bind. Regular practice unites body, breath, and mind.",
+                author: "Yoga Philosophy"
+            },
+            {
+                text: "The pose begins when you want to leave it. Breathe through the discomfort and find your edge.",
+                author: "Modern Yoga Wisdom"
+            },
+            {
+                text: "Yoga teaches us to cure what need not be endured and endure what cannot be cured.",
+                author: "B.K.S. Iyengar"
+            },
+            {
+                text: "The rhythm of the body, the melody of the mind, and the harmony of the soul create the dance of yoga.",
+                author: "B.K.S. Iyengar"
+            },
+            {
+                text: "Yoga is like music. The rhythm of the body, the melody of the mind, and the harmony of the soul create the symphony of life.",
+                author: "B.K.S. Iyengar"
+            }
+        ];
+
+        let currentQuoteIndex = 0;
+        let quoteInterval;
+        let onlineUsersInterval;
+
+        function rotateQuotes() {
+            const quotes = document.querySelectorAll('.yoga-quote');
+            if (quotes.length === 0) return;
+
+            quotes.forEach(quote => quote.classList.remove('active'));
+            
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            quotes[currentQuoteIndex].classList.add('active');
+        }
+
+        function startQuoteRotation() {
+            if (quoteInterval) clearInterval(quoteInterval);
+            quoteInterval = setInterval(rotateQuotes, 4000);
+        }
+
+        function stopQuoteRotation() {
+            if (quoteInterval) {
+                clearInterval(quoteInterval);
+                quoteInterval = null;
+            }
+        }
+
+        // Class data with Zoom links - now stored in Firestore
+        let classesData = [
             {
                 id: 'hatha-yoga',
                 name: 'Hatha Yoga',
@@ -1596,13 +2158,34 @@
             }
         ];
 
+        // Initialize Firestore classes collection with default data
+        async function initializeClasses() {
+            try {
+                const classesCollection = await db.collection('classes').get();
+                if (classesCollection.empty) {
+                    // Initialize with default classes
+                    for (const classData of classesData) {
+                        await db.collection('classes').doc(classData.id).set(classData);
+                    }
+                } else {
+                    // Load classes from Firestore
+                    classesData = [];
+                    classesCollection.forEach(doc => {
+                        classesData.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing classes:', error);
+            }
+        }
+
         // DOM Elements
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
         const mobileLoginBtn = document.getElementById('mobileLoginBtn');
         const mobileSignupBtn = document.getElementById('mobileSignupBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const dashboardBtn = document.getElementById('dashboardBtn');
+        
         const loginModal = document.getElementById('loginModal');
         const signupModal = document.getElementById('signupModal');
         const paymentModal = document.getElementById('paymentModal');
@@ -1615,8 +2198,7 @@
         const loginSuccess = document.getElementById('loginSuccess');
         const signupError = document.getElementById('signupError');
         const signupSuccess = document.getElementById('signupSuccess');
-        const authButtons = document.getElementById('authButtons');
-        const userMenu = document.getElementById('userMenu');
+        const userInfo = document.getElementById('userInfo');
         const userName = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
         const menuToggle = document.getElementById('menuToggle');
@@ -1635,11 +2217,26 @@
         const userClasses = document.getElementById('userClasses');
         const classesLoading = document.getElementById('classesLoading');
 
+        // Profile elements
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+
         // Payment elements
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
         const paymentLoading = document.getElementById('paymentLoading');
         const paymentError = document.getElementById('paymentError');
         const paymentSuccess = document.getElementById('paymentSuccess');
+
+        // Admin elements
+        const adminPanel = document.getElementById('adminPanel');
+        const adminIndicator = document.getElementById('adminIndicator');
+        const onlineCount = document.getElementById('onlineCount');
+        const addClassForm = document.getElementById('addClassForm');
+        const updateZoomForm = document.getElementById('updateZoomForm');
+        const zoomClassSelect = document.getElementById('zoomClassSelect');
+        const totalUsersSpan = document.getElementById('totalUsers');
+        const onlineUsersSpan = document.getElementById('onlineUsers');
 
         // Generate random OTP
         function generateOtp() {
@@ -1658,13 +2255,74 @@
             return emailjs.send('service_w4px03n', 'template_0lwjboh', templateParams);
         }
 
+        // Check if user is admin
+        function checkAdminStatus(email) {
+            return adminEmails.includes(email);
+        }
+
+        // Update user online status
+        async function updateOnlineStatus(userId, isOnline) {
+            try {
+                if (isOnline) {
+                    await db.collection('online_users').doc(userId).set({
+                        email: currentUser.email,
+                        name: currentUser.displayName || currentUser.email,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await db.collection('online_users').doc(userId).delete();
+                }
+            } catch (error) {
+                console.error('Error updating online status:', error);
+            }
+        }
+
+        // Get online users count
+        async function getOnlineUsersCount() {
+            try {
+                const onlineUsersSnapshot = await db.collection('online_users').get();
+                return onlineUsersSnapshot.size;
+            } catch (error) {
+                console.error('Error getting online users count:', error);
+                return 0;
+            }
+        }
+
+        // Get total users count
+        async function getTotalUsersCount() {
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                return usersSnapshot.size;
+            } catch (error) {
+                console.error('Error getting total users count:', error);
+                return 0;
+            }
+        }
+
+        // Update admin statistics
+        async function updateAdminStats() {
+            if (!isAdmin) return;
+            
+            const totalUsers = await getTotalUsersCount();
+            const onlineUsers = await getOnlineUsersCount();
+            
+            totalUsersSpan.textContent = totalUsers;
+            onlineUsersSpan.textContent = onlineUsers;
+            
+            if (onlineUsers > 0) {
+                onlineCount.textContent = `👥 ${onlineUsers} online`;
+                onlineCount.style.display = 'inline';
+            } else {
+                onlineCount.style.display = 'none';
+            }
+        }
+
         // Initialize user data in Firestore
         async function initializeUserData(user) {
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 
                 if (!userDoc.exists) {
-                    // Create user document with initial data
                     await db.collection('users').doc(user.uid).set({
                         name: user.displayName || '',
                         email: user.email,
@@ -1675,6 +2333,26 @@
                 }
             } catch (error) {
                 console.error('Error initializing user data:', error);
+            }
+        }
+
+        // Update user name in Firestore
+        async function updateUserName(userId, newName) {
+            try {
+                await db.collection('users').doc(userId).update({
+                    name: newName
+                });
+                
+                if (auth.currentUser) {
+                    await auth.currentUser.updateProfile({
+                        displayName: newName
+                    });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating user name:', error);
+                return false;
             }
         }
 
@@ -1720,16 +2398,63 @@
             }
         }
 
+        // Add new class (admin only)
+        async function addClass(classData) {
+            try {
+                const classId = classData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                await db.collection('classes').doc(classId).set({
+                    ...classData,
+                    id: classId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update local classes data
+                classesData.push({
+                    id: classId,
+                    ...classData
+                });
+                
+                return true;
+            } catch (error) {
+                console.error('Error adding class:', error);
+                return false;
+            }
+        }
+
+        // Update zoom link (admin only)
+        async function updateZoomLink(classId, newZoomLink) {
+            try {
+                await db.collection('classes').doc(classId).update({
+                    zoomLink: newZoomLink
+                });
+                
+                // Update local classes data
+                const classIndex = classesData.findIndex(c => c.id === classId);
+                if (classIndex !== -1) {
+                    classesData[classIndex].zoomLink = newZoomLink;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating zoom link:', error);
+                return false;
+            }
+        }
+
         // Show/Hide Dashboard
         function showDashboard() {
             landingPage.style.display = 'none';
+            document.getElementById('mainFooter').style.display = 'none';
             userDashboard.classList.add('active');
+            startQuoteRotation();
             loadUserDashboard();
         }
 
         function showLandingPage() {
             landingPage.style.display = 'block';
+            document.getElementById('mainFooter').style.display = 'block';
             userDashboard.classList.remove('active');
+            stopQuoteRotation();
         }
 
         // Load user dashboard data
@@ -1737,9 +2462,14 @@
             if (!auth.currentUser) return;
 
             // Update welcome message with user name
-            const welcomeMessage = document.getElementById('dashboardWelcome');
-            const displayName = auth.currentUser.displayName || auth.currentUser.email.split('@')[0];
-            welcomeMessage.textContent = `Welcome ${displayName}! Ready for your yoga journey?`;
+            const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+            const displayName = userData.name || auth.currentUser.displayName || auth.currentUser.email.split('@')[0];
+            
+            document.getElementById('dashboardUserName').textContent = displayName;
+
+            // Load classes from Firestore
+            await loadClasses();
 
             classesLoading.style.display = 'block';
             const unlockedClasses = await getUserUnlockedClasses(auth.currentUser.uid);
@@ -1756,7 +2486,7 @@
                     <img src="${classData.image}" alt="${classData.name}">
                     <div class="dashboard-card-content">
                         <span class="class-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
-                            ${isUnlocked ? 'Unlocked' : 'Locked'}
+                            ${isUnlocked ? '✅ Unlocked' : '🔒 Locked'}
                         </span>
                         <h3>${classData.name}</h3>
                         <p>${classData.description}</p>
@@ -1772,6 +2502,11 @@
                             `<button class="btn unlock-class-btn" data-class-id="${classData.id}">
                                 Join Now - ₹${classData.price}
                             </button>`
+                        }
+                        ${isAdmin ? 
+                            `<a href="${classData.zoomLink}" target="_blank" class="admin-zoom-link">
+                                <i class="fas fa-crown"></i> Admin Access
+                            </a>` : ''
                         }
                     </div>
                 `;
@@ -1790,9 +2525,128 @@
             classesLoading.style.display = 'none';
 
             // Update profile info
-            document.getElementById('profileName').value = auth.currentUser.displayName || '';
-            document.getElementById('profileEmail').value = auth.currentUser.email || '';
+            profileName.value = userData.name || auth.currentUser.displayName || '';
+            profileEmail.value = auth.currentUser.email || '';
         }
+
+        // Load classes from Firestore
+        async function loadClasses() {
+            try {
+                const classesSnapshot = await db.collection('classes').get();
+                classesData = [];
+                classesSnapshot.forEach(doc => {
+                    classesData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading classes:', error);
+            }
+        }
+
+        // Update zoom class select dropdown
+        function updateZoomClassSelect() {
+            zoomClassSelect.innerHTML = '<option value="">Select a class</option>';
+            classesData.forEach(classData => {
+                const option = document.createElement('option');
+                option.value = classData.id;
+                option.textContent = classData.name;
+                zoomClassSelect.appendChild(option);
+            });
+        }
+
+        // Profile name editing
+        profileName.addEventListener('input', () => {
+            saveProfileBtn.style.display = 'block';
+        });
+
+        saveProfileBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+
+            const newName = profileName.value.trim();
+            if (!newName) {
+                alert('Please enter a valid name');
+                return;
+            }
+
+            saveProfileBtn.textContent = 'Saving...';
+            saveProfileBtn.disabled = true;
+
+            const success = await updateUserName(auth.currentUser.uid, newName);
+            
+            if (success) {
+                saveProfileBtn.style.display = 'none';
+                userName.textContent = newName;
+                userAvatar.textContent = newName.charAt(0).toUpperCase();
+                document.getElementById('dashboardUserName').textContent = newName;
+                alert('Profile updated successfully!');
+            } else {
+                alert('Failed to update profile. Please try again.');
+            }
+
+            saveProfileBtn.textContent = 'Save Changes';
+            saveProfileBtn.disabled = false;
+        });
+
+        // Admin form handlers
+        addClassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isAdmin) {
+                alert('Admin access required');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const classData = {
+                name: formData.get('className') || document.getElementById('className').value,
+                description: formData.get('classDescription') || document.getElementById('classDescription').value,
+                duration: formData.get('classDuration') || document.getElementById('classDuration').value,
+                level: formData.get('classLevel') || document.getElementById('classLevel').value,
+                price: parseInt(formData.get('classPrice') || document.getElementById('classPrice').value),
+                image: formData.get('classImage') || document.getElementById('classImage').value,
+                zoomLink: formData.get('classZoomLink') || document.getElementById('classZoomLink').value
+            };
+            
+            const success = await addClass(classData);
+            
+            if (success) {
+                alert('Class added successfully!');
+                e.target.reset();
+                updateZoomClassSelect();
+                loadUserDashboard();
+            } else {
+                alert('Failed to add class. Please try again.');
+            }
+        });
+
+        updateZoomForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isAdmin) {
+                alert('Admin access required');
+                return;
+            }
+            
+            const classId = zoomClassSelect.value;
+            const newZoomLink = document.getElementById('newZoomLink').value;
+            
+            if (!classId || !newZoomLink) {
+                alert('Please select a class and enter a zoom link');
+                return;
+            }
+            
+            const success = await updateZoomLink(classId, newZoomLink);
+            
+            if (success) {
+                alert('Zoom link updated successfully!');
+                e.target.reset();
+                loadUserDashboard();
+            } else {
+                alert('Failed to update zoom link. Please try again.');
+            }
+        });
 
         // Show payment modal
         function showPaymentModal(classId) {
@@ -1803,7 +2657,6 @@
             document.getElementById('paymentClassName').textContent = classData.name;
             paymentModal.style.display = 'flex';
             
-            // Reset modal state
             paymentLoading.style.display = 'none';
             paymentError.style.display = 'none';
             paymentSuccess.style.display = 'none';
@@ -1851,14 +2704,10 @@
         };
 
         // Event Listeners
-        loginBtn.addEventListener('click', showLoginModal);
-        signupBtn.addEventListener('click', showSignupModal);
         mobileLoginBtn.addEventListener('click', showLoginModal);
         mobileSignupBtn.addEventListener('click', showSignupModal);
         switchToLogin.addEventListener('click', showLoginModal);
         switchToSignup.addEventListener('click', showSignupModal);
-
-        dashboardBtn.addEventListener('click', showDashboard);
 
         closeModalButtons.forEach(button => {
             button.addEventListener('click', closeModal);
@@ -1876,11 +2725,9 @@
             tab.addEventListener('click', () => {
                 const targetTab = tab.getAttribute('data-tab');
                 
-                // Remove active class from all tabs and contents
                 dashboardTabs.forEach(t => t.classList.remove('active'));
                 dashboardContents.forEach(c => c.classList.remove('active'));
                 
-                // Add active class to clicked tab and corresponding content
                 tab.classList.add('active');
                 document.getElementById(targetTab + 'Tab').classList.add('active');
             });
@@ -1928,7 +2775,6 @@
             signupError.style.display = 'none';
             signupSuccess.style.display = 'none';
             
-            // Validation
             if (!name || !email || !password || !confirmPassword) {
                 signupError.textContent = 'Please fill in all fields';
                 signupError.style.display = 'block';
@@ -1947,10 +2793,8 @@
                 return;
             }
 
-            // Store signup data for later use
             pendingSignupData = { name, email, password };
             
-            // Generate and send OTP
             generatedOtp = generateOtp();
             sendOtpBtn.textContent = 'Sending OTP...';
             sendOtpBtn.disabled = true;
@@ -1993,7 +2837,6 @@
                 return;
             }
             
-            // OTP verified, proceed with Firebase signup
             if (!pendingSignupData) {
                 signupError.textContent = 'Session expired. Please try again.';
                 signupError.style.display = 'block';
@@ -2011,7 +2854,6 @@
                     });
                 })
                 .then(() => {
-                    // Initialize user data in Firestore
                     return initializeUserData(auth.currentUser);
                 })
                 .then(() => {
@@ -2077,7 +2919,7 @@
                 const success = await unlockClassForUser(auth.currentUser.uid, currentPaymentClass);
                 
                 if (success) {
-                    paymentSuccess.textContent = 'Payment confirmed! Class unlocked successfully!';
+                    paymentSuccess.textContent = 'Payment confirmed! Class unlocked successfully! 🎉';
                     paymentSuccess.style.display = 'block';
                     
                     analytics.logEvent('payment_completed', {
@@ -2103,13 +2945,8 @@
             paymentLoading.style.display = 'none';
         });
 
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut();
-            analytics.logEvent('logout');
-        });
+        
 
-        // Dashboard logout button
         const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
         if (dashboardLogoutBtn) {
             dashboardLogoutBtn.addEventListener('click', () => {
@@ -2119,22 +2956,60 @@
         }
 
         // Auth State Listener
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                authButtons.style.display = 'none';
-                userMenu.style.display = 'flex';
-                userName.textContent = user.displayName || user.email;
-                userAvatar.textContent = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+                currentUser = user;
+                isAdmin = checkAdminStatus(user.email);
+                
+                userInfo.style.display = 'flex';
+                
+                // Get user data from Firestore for better name display
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    const displayName = userData.name || user.displayName || user.email.split('@')[0];
+                    
+                    userName.textContent = displayName;
+                    userAvatar.textContent = displayName.charAt(0).toUpperCase();
+                    
+                    // Show admin indicator
+                    if (isAdmin) {
+                        adminIndicator.style.display = 'inline';
+                        adminPanel.style.display = 'block';
+                        updateZoomClassSelect();
+                        updateAdminStats();
+                        
+                        // Start interval for updating online users count
+                        onlineUsersInterval = setInterval(updateAdminStats, 10000); // Update every 10 seconds
+                    }
+                } catch (error) {
+                    userName.textContent = user.displayName || user.email;
+                    userAvatar.textContent = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+                }
                 
                 // Initialize user data if needed
                 initializeUserData(user);
+                
+                // Update online status
+                await updateOnlineStatus(user.uid, true);
                 
                 analytics.logEvent('user_authenticated', {
                     user_id: user.uid
                 });
             } else {
-                authButtons.style.display = 'flex';
-                userMenu.style.display = 'none';
+                currentUser = null;
+                isAdmin = false;
+                userInfo.style.display = 'none';
+                adminPanel.style.display = 'none';
+                adminIndicator.style.display = 'none';
+                onlineCount.style.display = 'none';
+                
+                // Clear intervals
+                if (onlineUsersInterval) {
+                    clearInterval(onlineUsersInterval);
+                    onlineUsersInterval = null;
+                }
+                
                 showLandingPage();
             }
         });
@@ -2150,19 +3025,17 @@
             });
         });
 
-        // Track button clicks for analytics
-        document.querySelectorAll('.btn').forEach(button => {
-            button.addEventListener('click', () => {
-                analytics.logEvent('button_click', {
-                    button_text: button.textContent,
-                    page_location: window.location.href
-                });
-            });
+        // Handle page unload - update offline status
+        window.addEventListener('beforeunload', async () => {
+            if (currentUser) {
+                await updateOnlineStatus(currentUser.uid, false);
+            }
         });
 
         // Initialize the application
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             showLandingPage();
+            await initializeClasses();
         });
     </script>
 </body>
