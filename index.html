@@ -363,6 +363,60 @@
             background: #218838;
         }
         
+        /* Certificates Section */
+        .certificates {
+            background-color: #f9f9f9;
+        }
+        
+        .certificates-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .certificate-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .certificate-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .certificate-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .certificate-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .certificate-card:hover .certificate-image img {
+            transform: scale(1.1);
+        }
+        
+        .certificate-content {
+            padding: 25px;
+        }
+        
+        .certificate-content h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .certificate-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
         /* About Section */
         .about-content {
             display: flex;
@@ -526,6 +580,29 @@
         .posture-benefits {
             color: #777;
             margin-bottom: 15px;
+        }
+
+        .posture-fact {
+            background: #f0f7f4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .posture-fact i {
+            color: var(--primary);
+            margin-top: 2px;
+            font-size: 1.1rem;
+        }
+
+        .posture-fact span {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #555;
         }
         
         /* Testimonials */
@@ -909,6 +986,7 @@
                 <ul class="nav-links" id="navLinks">
                     <li><a href="#home">Home</a></li>
                     <li><a href="#about">About</a></li>
+                    <li><a href="#certificates">Certificates</a></li>
                     <li><a href="#benefits">Benefits</a></li>
                     <li><a href="#classes">Classes</a></li>
                     <li><a href="#postures">Postures</a></li>
@@ -943,7 +1021,7 @@
             <div class="container">
                 <div class="hero-content">
                     <h1>Find Your Inner Peace with Supravi Yoga</h1>
-                    <p>Join our online yoga community and transform your body, mind, and spirit with expert guidance from certified instructors.</p>
+                    <p>Join our online yoga community and transform your body, mind, and spirit with expert guidance from certified instructor.</p>
                     <a href="#classes" class="btn btn-secondary">Explore Classes</a>
                 </div>
             </div>
@@ -955,13 +1033,48 @@
                 <h2 class="section-title">About Supravi Yoga</h2>
                 <div class="about-content">
                     <div class="about-text">
-                        <p>Supravi Yoga is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by master yogi Charitha Chowdary, our studio brings together traditional wisdom and modern approaches to wellness.</p>
-                        <p>We believe that yoga is for everyone - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
-                        <p>At Supravi Yoga, we offer a variety of styles including Hatha, Vinyasa, Yin, and Restorative yoga. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
-                        <a href="#" class="btn">Meet Our Instructors</a>
+                        <p>Supravi Yoga is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by Yoga Coach Chowdary Charitha, our studio brings together traditional wisdom and modern approaches to wellness.</p>
+                        <p>We believe that yoga is for everyone - regardless of age, fitness level, or experience.</p>
+            <p>At Supravi Yoga, we offer a variety of styles including Hatha, Ashtanga-Vinyasa, and specialized yoga classes. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
                     </div>
-                    <div class="about-image">
-                        <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Certificates and Awards Section -->
+        <section id="certificates" class="certificates">
+            <div class="container">
+                <h2 class="section-title">Certificates & Awards</h2>
+                <div class="certificates-container">
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Alliance Certification">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Yoga Alliance RYT-500 Certification</h3>
+                            <p>Registered Yoga Teacher with 500-hour certification from Yoga Alliance, ensuring the highest standards of yoga instruction and practice.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Excellence in Yoga Award">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Excellence in Yoga Teaching Award 2024</h3>
+                            <p>Recognized for outstanding contribution to yoga education and innovative teaching methodologies in the wellness community.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Meditation Certification">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Advanced Meditation & Mindfulness Certification</h3>
+                            <p>Specialized certification in meditation techniques and mindfulness practices, enhancing the holistic yoga experience for all students.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1038,37 +1151,37 @@
                                 <span><i class="far fa-clock"></i> 60 min</span>
                                 <span><i class="fas fa-user"></i> All Levels</span>
                             </div>
-                            <p>A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners.</p>
+                            <p>A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners seeking balance and mindfulness.</p>
                             <button class="btn join-class-btn">Join Class</button>
                         </div>
                     </div>
                     
                     <div class="class-card">
                         <div class="class-image">
-                            <img src="https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Vinyasa Flow">
+                            <img src="https://images.unsplash.com/photo-1506629905607-2b532004aebf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Ashtanga Vinyasa Flow">
                         </div>
                         <div class="class-content">
-                            <h3>Vinyasa Flow</h3>
+                            <h3>Ashtanga - Vinyasa Flow</h3>
                             <div class="class-info">
                                 <span><i class="far fa-clock"></i> 75 min</span>
                                 <span><i class="fas fa-user"></i> Intermediate</span>
                             </div>
-                            <p>A dynamic practice that links movement with breath in a flowing sequence of poses.</p>
+                            <p>A powerful and dynamic practice combining traditional Ashtanga sequences with flowing Vinyasa movements for strength and flexibility.</p>
                             <button class="btn join-class-btn">Join Class</button>
                         </div>
                     </div>
                     
                     <div class="class-card">
                         <div class="class-image">
-                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yin Yoga">
+                            <img src="https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Class">
                         </div>
                         <div class="class-content">
-                            <h3>Yin Yoga</h3>
+                            <h3>Yoga Class</h3>
                             <div class="class-info">
                                 <span><i class="far fa-clock"></i> 45 min</span>
                                 <span><i class="fas fa-user"></i> All Levels</span>
                             </div>
-                            <p>A slow-paced style with poses held for longer periods to target deep connective tissues.</p>
+                            <p>A comprehensive yoga class combining various styles and techniques to enhance overall wellness, flexibility, and inner peace.</p>
                             <button class="btn join-class-btn">Join Class</button>
                         </div>
                     </div>
@@ -1083,67 +1196,85 @@
                 <div class="postures-container">
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Downward Facing Dog">
+                            <img src="adhomukhasan.jpg" alt="Downward Facing Dog">
                         </div>
                         <div class="posture-content">
                             <h3>Downward Facing Dog (Adho Mukha Svanasana)</h3>
                             <p class="posture-benefits">Strengthens arms and legs, stretches shoulders, hamstrings, and calves, calms the mind</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Fun Fact: This pose mimics how dogs naturally stretch, helping to energize the entire body while inverting the heart above the head!</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tree Pose">
+                            <img src="vriksha.jpg" alt="Tree Pose">
                         </div>
                         <div class="posture-content">
                             <h3>Tree Pose (Vrikshasana)</h3>
                             <p class="posture-benefits">Improves balance, strengthens thighs, calves, and spine, stretches groins and inner thighs</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-tree"></i>
+                                <span>Did you know? Practicing Tree Pose regularly can improve focus and concentration by training your mind to stay present and balanced.</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Warrior II">
+                            <img src="veera.jpg" alt="Warrior II">
                         </div>
                         <div class="posture-content">
                             <h3>Warrior II (Virabhadrasana II)</h3>
                             <p class="posture-benefits">Strengthens legs and arms, increases stamina, improves balance and concentration</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-fist-raised"></i>
+                                <span>Ancient Wisdom: Named after the fierce warrior Virabhadra, this pose builds inner strength and confidence while teaching grace under pressure.</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Child's Pose">
+                            <img src="bala.jpg" alt="Child's Pose">
                         </div>
                         <div class="posture-content">
                             <h3>Child's Pose (Balasana)</h3>
                             <p class="posture-benefits">Gently stretches hips, thighs, and ankles, relieves back and neck pain, calms the mind</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-heart"></i>
+                                <span>Healing Touch: This restorative pose activates the parasympathetic nervous system, naturally reducing stress hormones and promoting deep relaxation.</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cobra Pose">
+                            <img src="bhujang.jpg" alt="Cobra Pose">
                         </div>
                         <div class="posture-content">
                             <h3>Cobra Pose (Bhujangasana)</h3>
                             <p class="posture-benefits">Strengthens the spine, stretches chest and lungs, improves flexibility of the upper and middle back</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                <span>Energy Boost: This backbend opens the heart chakra and can naturally boost energy levels while improving posture from daily sitting.</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="posture-card">
                         <div class="posture-image">
-                            <img src="https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Bridge Pose">
+                            <img src="setu.jpg" alt="Bridge Pose">
                         </div>
                         <div class="posture-content">
                             <h3>Bridge Pose (Setu Bandhasana)</h3>
                             <p class="posture-benefits">Stretches chest, neck, and spine, calms the brain, reduces anxiety, improves digestion</p>
-                            <button class="btn">Learn More</button>
+                            <div class="posture-fact">
+                                <i class="fas fa-brain"></i>
+                                <span>Mind-Body Connection: This gentle inversion increases blood flow to the brain, potentially improving memory and mental clarity.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1178,8 +1309,8 @@
     <div id="userDashboard" class="dashboard">
         <div class="dashboard-header">
             <div class="container">
-                <h1>Welcome to Your Dashboard</h1>
-                <p id="dashboardWelcome">Manage your yoga journey</p>
+                <h1>Supravi Yoga</h1>
+                <p id="dashboardWelcome">Welcome to your yoga journey</p>
             </div>
         </div>
 
@@ -1188,6 +1319,7 @@
                 <button class="dashboard-tab active" data-tab="classes">My Classes</button>
                 <button class="dashboard-tab" data-tab="profile">Profile</button>
                 <button class="dashboard-tab" data-tab="payments">Payment History</button>
+                <button class="btn" id="dashboardLogoutBtn" style="margin-left: auto;">Logout</button>
             </nav>
 
             <!-- Classes Tab -->
@@ -1322,7 +1454,7 @@
                     </ol>
                 </div>
 
-                <a href="https://razorpay.me/@smartclasses7445/1" target="_blank" class="razorpay-link">
+                <a href="https://razorpay.me/@smartclasses7445" target="_blank" class="razorpay-link">
                     Pay Now - ₹1
                 </a>
 
@@ -1363,6 +1495,7 @@
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#about">About</a></li>
+                        <li><a href="#certificates">Certificates</a></li>
                         <li><a href="#benefits">Benefits</a></li>
                         <li><a href="#classes">Classes</a></li>
                         <li><a href="#postures">Postures</a></li>
@@ -1373,9 +1506,9 @@
                 <div class="footer-column">
                     <h3>Contact Us</h3>
                     <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Yoga Street, Wellness City</li>
-                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
-                        <li><i class="fas fa-envelope"></i> info@supraviyoga.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Supraviyoga, Hyderabad</li>
+                        <li><i class="fas fa-phone"></i> +91 7997142404</li>
+                        <li><i class="fas fa-envelope"></i> supraviyoga@gmail.com</li>
                     </ul>
                 </div>
                 
@@ -1434,7 +1567,7 @@
             {
                 id: 'hatha-yoga',
                 name: 'Hatha Yoga',
-                description: 'A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners.',
+                description: 'A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners seeking balance and mindfulness.',
                 duration: '60 min',
                 level: 'All Levels',
                 price: 1,
@@ -1442,23 +1575,23 @@
                 zoomLink: 'https://zoom.us/j/1234567890?pwd=example1'
             },
             {
-                id: 'vinyasa-flow',
-                name: 'Vinyasa Flow',
-                description: 'A dynamic practice that links movement with breath in a flowing sequence of poses.',
+                id: 'ashtanga-vinyasa-flow',
+                name: 'Ashtanga - Vinyasa Flow',
+                description: 'A powerful and dynamic practice combining traditional Ashtanga sequences with flowing Vinyasa movements for strength and flexibility.',
                 duration: '75 min',
                 level: 'Intermediate',
                 price: 1,
-                image: 'https://images.unsplash.com/photo-1545389336-8c6dfde0b0d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                image: 'https://images.unsplash.com/photo-1506629905607-2b532004aebf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                 zoomLink: 'https://zoom.us/j/1234567891?pwd=example2'
             },
             {
-                id: 'yin-yoga',
-                name: 'Yin Yoga',
-                description: 'A slow-paced style with poses held for longer periods to target deep connective tissues.',
+                id: 'yoga-class',
+                name: 'Yoga Class',
+                description: 'A comprehensive yoga class combining various styles and techniques to enhance overall wellness, flexibility, and inner peace.',
                 duration: '45 min',
                 level: 'All Levels',
                 price: 1,
-                image: 'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                image: 'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                 zoomLink: 'https://zoom.us/j/1234567892?pwd=example3'
             }
         ];
@@ -1602,6 +1735,11 @@
         // Load user dashboard data
         async function loadUserDashboard() {
             if (!auth.currentUser) return;
+
+            // Update welcome message with user name
+            const welcomeMessage = document.getElementById('dashboardWelcome');
+            const displayName = auth.currentUser.displayName || auth.currentUser.email.split('@')[0];
+            welcomeMessage.textContent = `Welcome ${displayName}! Ready for your yoga journey?`;
 
             classesLoading.style.display = 'block';
             const unlockedClasses = await getUserUnlockedClasses(auth.currentUser.uid);
@@ -1970,6 +2108,15 @@
             auth.signOut();
             analytics.logEvent('logout');
         });
+
+        // Dashboard logout button
+        const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
+        if (dashboardLogoutBtn) {
+            dashboardLogoutBtn.addEventListener('click', () => {
+                auth.signOut();
+                analytics.logEvent('logout');
+            });
+        }
 
         // Auth State Listener
         auth.onAuthStateChanged((user) => {
