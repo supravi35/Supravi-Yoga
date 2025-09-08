@@ -3208,9 +3208,39 @@
         let quoteInterval;
         let onlineUsersInterval;
 
-        // Backend API URLs - Update this with your Replit deployment URL
-        // const API_BASE_URL = window.location.origin; // Uses the same domain as the frontend - REMOVED TO USE CLOUD FUNCTIONS
-        const API_BASE_URL = 'https://us-central1-supravi-yoga.cloudfunctions.net/api'; // Updated to use Firebase Functions API base URL
+        // Backend API URLs - Using Firebase Functions
+        const API_BASE_URL = 'https://api-w6jwkvmcsa-uc.a.run.app'; // Updated to use the actual deployed Function URL
+
+        // Check for payment success on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment_success') === 'true' && urlParams.get('order_id')) {
+                const orderId = urlParams.get('order_id');
+                // Auto-verify payment if user is logged in
+                if (auth.currentUser) {
+                    handlePaymentReturn(orderId);
+                }
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        // Handle payment return from Cashfree
+        async function handlePaymentReturn(orderId) {
+            if (!orderId) return;
+
+            try {
+                const verificationResult = await verifyPayment(orderId);
+                if (verificationResult.success && verificationResult.data.paymentStatus === 'SUCCESS') {
+                    alert('Payment successful! Your subscription has been activated.');
+                    if (userDashboard.classList.contains('active')) {
+                        loadUserDashboard();
+                    }
+                }
+            } catch (error) {
+                console.error('Error handling payment return:', error);
+            }
+        }
 
         function rotateQuotes() {
             const quotes = document.querySelectorAll('.yoga-quote');
@@ -4118,6 +4148,13 @@
 
         // Show subscription modal
         function showSubscriptionModal(classId) {
+            // Check if user is logged in first
+            if (!auth.currentUser) {
+                alert('Please login first to subscribe to classes.');
+                showLoginModal();
+                return;
+            }
+
             const classData = classesData.find(c => c.id === classId);
             if (!classData) return;
 
@@ -4200,57 +4237,103 @@
 
         // Create Cashfree Order
         async function createCashfreeOrder(userId, planData) {
-            const customerDetails = await db.collection('users').doc(userId).get().then(doc => doc.data() || {});
+            let customerDetails = {};
+            
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                customerDetails = userDoc.exists ? userDoc.data() : {};
+            } catch (error) {
+                console.warn('Could not fetch user details:', error);
+                customerDetails = {};
+            }
 
             const orderRequest = {
                 userId: userId,
                 customerName: customerDetails.name || currentUser.displayName || 'Customer',
                 customerEmail: currentUser.email,
-                customerPhone: customerDetails.phone || '+919999999999', // Default phone number
+                customerPhone: customerDetails.phone || '+919999999999',
                 orderAmount: planData.price,
                 orderCurrency: 'INR',
                 orderDescription: `Supravi Yoga - ${planData.name}`,
-                classId: currentPaymentClass, // Use the globally set currentPaymentClass
-                planType: selectedSubscriptionPlan // e.g., 'group-yearly', 'demo'
+                classId: currentPaymentClass,
+                planType: selectedSubscriptionPlan
             };
 
             try {
+                console.log('Creating order with:', orderRequest);
+                
                 const response = await fetch(`${API_BASE_URL}/create-order`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
                     },
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify(orderRequest),
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                    let errorMessage = `Payment service error (${response.status})`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        const textError = await response.text();
+                        errorMessage = textError || errorMessage;
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const orderData = await response.json();
-                console.log('Cashfree order created:', orderData);
-                return orderData; // Expected: { orderId: '...', paymentUrl: '...', orderAmount: '...' }
+                
+                if (!orderData.success) {
+                    throw new Error(orderData.message || 'Failed to create payment order');
+                }
+
+                console.log('Cashfree order created successfully:', orderData);
+                return orderData;
 
             } catch (error) {
                 console.error('Error creating Cashfree order:', error);
-                throw error; // Re-throw to be caught by calling functions
+                
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error('Network error: Please check your internet connection and try again.');
+                } else if (error.message.includes('CORS')) {
+                    throw new Error('Service temporarily unavailable. Please try again in a moment.');
+                } else {
+                    throw new Error(error.message || 'Payment initialization failed. Please try again.');
+                }
             }
         }
 
         // Verify Cashfree Payment
         async function verifyPayment(orderId) {
             try {
+                console.log('Verifying payment for order:', orderId);
+                
                 const response = await fetch(`${API_BASE_URL}/verify-payment?orderId=${orderId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                     },
+                    mode: 'cors',
                 });
 
+                console.log('Verification response status:', response.status);
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                    let errorMessage = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        const textError = await response.text();
+                        errorMessage = textError || errorMessage;
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const verificationResult = await response.json();
@@ -4259,7 +4342,15 @@
 
             } catch (error) {
                 console.error('Error verifying payment:', error);
-                throw error;
+                
+                // More specific error messages
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error('Network error: Unable to verify payment. Please check your internet connection.');
+                } else if (error.message.includes('CORS')) {
+                    throw new Error('Access denied: Payment verification service error. Please try again later.');
+                } else {
+                    throw new Error(error.message || 'Failed to verify payment. Please try again.');
+                }
             }
         }
 
@@ -4497,11 +4588,19 @@
                 return;
             }
 
-            document.getElementById('demoTimeModal').style.display = 'flex';
+            // Check if user already booked demo
+            hasUserBookedDemo(auth.currentUser.uid).then(hasBooked => {
+                if (hasBooked) {
+                    alert('You have already used your demo class. Demo is available only once per user.');
+                    return;
+                }
 
-            // Set minimum date to today
-            const today = new Date();
-            document.getElementById('demoDate').min = today.toISOString().split('T')[0];
+                document.getElementById('demoTimeModal').style.display = 'flex';
+
+                // Set minimum date to today
+                const today = new Date();
+                document.getElementById('demoDate').min = today.toISOString().split('T')[0];
+            });
         }
 
         // Create Demo Booking (integrates with Cashfree order creation)
@@ -4887,6 +4986,7 @@
             if (!currentUser || !selectedSubscriptionPlan) return;
 
             confirmPaymentBtn.disabled = true;
+            confirmPaymentBtn.textContent = 'Processing...';
             paymentLoading.style.display = 'block';
             paymentError.style.display = 'none';
             paymentSuccess.style.display = 'none';
@@ -4900,16 +5000,19 @@
                 // Store order ID for verification
                 window.currentOrderId = orderData.orderId;
 
-                // Redirect to Cashfree payment page
-                window.open(orderData.paymentUrl, '_blank');
-
-                // Show payment instructions
+                // Show payment instructions and link
                 paymentLoading.style.display = 'none';
-                document.getElementById('paymentInstructions').style.display = 'block';
+                document.querySelector('.payment-instructions').style.display = 'block';
 
                 // Update the payment link
-                document.getElementById('razorpayLink').href = orderData.paymentUrl;
-                document.getElementById('razorpayLink').textContent = `Pay ₹${orderData.orderAmount} with Cashfree`;
+                const paymentLink = document.getElementById('razorpayLink');
+                paymentLink.href = orderData.paymentUrl;
+                paymentLink.textContent = `Pay ₹${orderData.orderAmount} with Cashfree`;
+                paymentLink.style.display = 'inline-block';
+
+                // Reset button for verification
+                confirmPaymentBtn.textContent = 'I have completed payment';
+                confirmPaymentBtn.disabled = false;
 
                 analytics.logEvent('payment_initiated', {
                     plan_type: selectedSubscriptionPlan,
@@ -4922,7 +5025,8 @@
                 paymentLoading.style.display = 'none';
                 paymentError.style.display = 'block';
                 paymentError.textContent = error.message || 'Failed to initiate payment. Please try again.';
-                confirmPaymentBtn.disabled = false; // Re-enable button on error
+                confirmPaymentBtn.disabled = false;
+                confirmPaymentBtn.textContent = 'Try Again';
             }
         });
 
