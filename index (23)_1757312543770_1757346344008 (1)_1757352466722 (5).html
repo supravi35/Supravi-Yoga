@@ -1,0 +1,5206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supravi Yoga - Find Your Inner Peace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Firebase Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        /* Global Styles */
+        :root {
+            --primary: #2d5a87;
+            --secondary: #ff6b35;
+            --light: #fafafa;
+            --dark: #1a1a1a;
+            --accent: #e63946;
+            --success: #06d6a0;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-secondary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #ee5a6f 0%, #f093fb 100%);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.6);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-disabled:hover {
+            transform: none;
+            background-color: #6c757d;
+        }
+
+        .btn-danger {
+            background-color: var(--accent);
+        }
+
+        .btn-danger:hover {
+            background-color: #e55555;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--primary);
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .logo-tagline {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            position: absolute;
+            left: 0;
+        }
+
+        .nav-links li {
+            margin-left: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links .btn {
+            margin-left: 10px;
+        }
+
+        /* Mobile Menu */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+        }
+
+        .menu-toggle span {
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-section {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Welcome Note */
+        .welcome-note {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            max-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease;
+        }
+
+        .welcome-note.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .welcome-note.hide {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .welcome-note h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .welcome-note p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .welcome-note .close-welcome {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .welcome-note .close-welcome:hover {
+            opacity: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary), #2d5a4a);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: floatBackground 20s linear infinite;
+        }
+
+        @keyframes floatBackground {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .dashboard-title {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            text-align: left;
+        }
+
+        .dashboard-logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-user-info {
+            position: relative;
+            z-index: 2;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .dashboard-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            background-color: var(--secondary);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .dashboard-user-details {
+            text-align: left;
+        }
+
+        .dashboard-user-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-admin-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-online-count {
+            background: var(--secondary);
+            color: var(--dark);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .dashboard-nav {
+            background: white;
+            border-radius: 15px;
+            margin: 30px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 20px;
+        }
+
+        .dashboard-nav button {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .dashboard-nav button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dashboard-nav button:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        .dashboard-content {
+            display: none;
+            background: white;
+            margin: 20px 0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-content.active {
+            display: block;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .admin-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .admin-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-form input, .admin-form select, .admin-form textarea {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-form button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-form button:hover {
+            background: #f0f0f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Yoga Quotes Slider */
+        .yoga-quotes-container {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .yoga-quote {
+            color: white;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.1rem;
+            display: none;
+            animation: fadeInOut 6s ease-in-out infinite;
+        }
+
+        .yoga-quote.active {
+            display: block;
+        }
+
+        .yoga-quote .quote-text {
+            margin-bottom: 10px;
+        }
+
+        .yoga-quote .quote-author {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dashboard-class-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-class-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard-class-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .dashboard-card-content {
+            padding: 25px;
+        }
+
+        .class-status {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-locked {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unlocked {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .class-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .zoom-link {
+            background: var(--success);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-link:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .admin-zoom-link {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-zoom-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .profile-avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            object-fit: cover;
+            background-color: var(--secondary);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-avatar-upload {
+            display: none;
+        }
+
+        .profile-avatar-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar-button:hover {
+            background: #3a7262;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-edit-mode .form-group input {
+            border: 2px solid var(--primary);
+            background: #f8f9fa;
+        }
+
+        .profile-edit-mode .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 142, 124, 0.1);
+        }
+
+        /* About Section - Curved Box Design */
+        .about {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><path d="M421.9,6.5c22.6-2.5,51.5,0.4,75.5,5.3c23.6,4.9,70.9,23.5,100.5,35.7c75.8,32.2,133.7,44.5,192.6,49.7c23.6,2.1,48.7,3.5,103.4-2.5c54.7-6,106.2-25.6,106.2-25.6V0H0v30.3c0,0,72,32.6,158.4,30.5c39.2-0.7,92.8-6.7,134-22.4c21.2-8.1,52.2-18.2,79.7-24.2C399.3,7.9,411.6,7.5,421.9,6.5z" fill="rgba(255,255,255,0.1)"/></svg>') no-repeat center top;
+            background-size: cover;
+        }
+
+        .about-curved-container {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--dark);
+            margin: 40px 0;
+            padding: 40px;
+            border-radius: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-curved-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(74, 142, 124, 0.1), transparent);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .about-curved-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .about-image {
+            flex: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Certificates Section */
+        .certificates {
+            background-color: #f9f9f9;
+        }
+
+        .certificates-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .certificate-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .certificate-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .certificate-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .certificate-card:hover .certificate-image img {
+            transform: scale(1.1);
+        }
+
+        .certificate-content {
+            padding: 25px;
+        }
+
+        .certificate-content h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .certificate-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background-color: #f0f7f4;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .benefit-card h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        /* Classes Section */
+        .classes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .class-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .class-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .class-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .class-card:hover .class-image img {
+            transform: scale(1.1);
+        }
+
+        .class-content {
+            padding: 20px;
+        }
+
+        .class-content h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .class-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #777;
+        }
+
+        /* Subscription Plans Section - Title Only */
+        .subscription-plans {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 80px 0;
+        }
+
+        .subscription-intro {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Demo Class Offer */
+        .demo-offer {
+            margin-bottom: 60px;
+        }
+
+        .demo-card {
+            background: linear-gradient(45deg, #ff6b35, #f7931e, #ffd700);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: floatBackground 15s linear infinite;
+        }
+
+        .demo-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .demo-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .demo-price {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .demo-features {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .demo-features li {
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .demo-features i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        .btn-demo {
+            background: var(--dark);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-demo:hover {
+            background: #222;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Subscription Tabs */
+        .subscription-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .subscription-tab {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subscription-tab.active,
+        .subscription-tab:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 142, 124, 0.3);
+        }
+
+        /* Subscription Content */
+        .subscription-content {
+            display: none;
+        }
+
+        .subscription-content.active {
+            display: block;
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .plan-header h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .plan-header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Subscription Cards */
+        .subscription-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-card.featured {
+            border: 3px solid var(--secondary);
+            transform: scale(1.02);
+        }
+
+        .subscription-card.premium {
+            border: 3px solid #8e44ad;
+        }
+
+        .plan-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .plan-type {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .plan-icon {
+            background: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .plan-type h4 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        /* Pricing Options */
+        .pricing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pricing-option {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .pricing-option.recommended {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .pricing-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .duration-badge {
+            background: var(--secondary);
+            color: var(--dark);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .duration {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            margin-bottom: 10px;
+        }
+
+        .original-price {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #999;
+            text-decoration: line-through;
+            display: block;
+        }
+
+        .pricing-option.recommended .original-price {
+            color: #ccc;
+        }
+
+        .current-price {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--primary);
+            display: block;
+            margin-top: 5px;
+        }
+
+        .pricing-option.recommended .current-price {
+            color: white;
+        }
+
+        .savings {
+            font-weight: 600;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .pricing-option.recommended .savings {
+            color: var(--secondary);
+        }
+
+        .offer-validity {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e74c3c;
+        }
+
+        .pricing-option.recommended .offer-validity {
+            color: #ffeaa7;
+        }
+
+        /* Plan Features */
+        .plan-features {
+            margin-bottom: 30px;
+        }
+
+        .plan-features h5 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .plan-features ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .plan-features li:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .plan-features i {
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+
+        /* Subscribe Button */
+        .btn-subscribe, .unlock-class-btn {
+            width: auto;
+            max-width: 160px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: block;
+            margin: 10px auto;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-subscribe:hover {
+            background: linear-gradient(45deg, #3a7262, var(--primary));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(74, 142, 124, 0.3);
+        }
+
+        /* Subscription Footer */
+        .subscription-footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .subscription-footer p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .contact-info {
+            color: #666;
+        }
+
+        .contact-info strong {
+            color: var(--primary);
+        }
+
+        /* Yoga Postures Section */
+        .postures-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .posture-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .posture-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .posture-image {
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .posture-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .posture-card:hover .posture-image img {
+            transform: scale(1.1);
+        }
+
+        .posture-content {
+            padding: 20px;
+        }
+
+        .posture-content h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .posture-benefits {
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .posture-fact {
+            background: #f0f7f4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .posture-fact i {
+            color: var(--primary);
+            margin-top: 2px;
+            font-size: 1.1rem;
+        }
+
+        .posture-fact span {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: linear-gradient(to right, #4a8e7c, #5da992);
+            color: white;
+        }
+
+        .testimonials .section-title {
+            color: white;
+        }
+
+        .testimonials .section-title:after {
+            background: var(--secondary);
+        }
+
+        .testimonial-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .testimonial {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+        }
+
+        /* Login/Signup Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .otp-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .otp-input {
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .resend-otp {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Subscription Selection Modal */
+        .subscription-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subscription-modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            color: white;
+        }
+
+        .subscription-modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .subscription-modal-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subscription-type-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subscription-type-tab {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .subscription-type-tab.active,
+        .subscription-type-tab:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .subscription-plan-content {
+            display: none;
+        }
+
+        .subscription-plan-content.active {
+            display: block;
+        }
+
+        .subscription-plan-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .subscription-plan-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subscription-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subscription-option {
+            background: #f5f5f5;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .subscription-option:hover {
+            background: #e8e8e8;
+            transform: translateY(-3px);
+        }
+
+        .subscription-option.selected {
+            border-color: var(--secondary);
+            background: #e0e0e0;
+        }
+
+        .subscription-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .subscription-duration {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .subscription-price {
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #333;
+        }
+
+        .original-price {
+            font-size: 1rem;
+            text-decoration: line-through;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .current-price {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #333;
+        }
+
+        .subscription-savings {
+            color: #28a745;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .subscription-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .subscription-features li {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subscription-features i {
+            color: #28a745;
+        }
+
+        .subscription-features {
+            color: #333;
+        }
+
+        .subscription-modal-footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-continue-subscription {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: block;
+            margin: 10px auto;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-continue-subscription:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-continue-subscription:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Admin Fee Management */
+        .admin-fee-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .fee-management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .fee-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fee-item input {
+            width: 80px;
+            padding: 5px 8px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            font-weight: bold;
+        }
+
+        /* Demo Time Selection Modal */
+        .time-slots {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .time-slot {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary);
+            background-color: #f8f9fa;
+        }
+
+        .time-slot input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .time-slot input[type="radio"]:checked + label {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .time-slot:has(input[type="radio"]:checked) {
+            border-color: var(--primary);
+            background-color: rgba(74, 142, 124, 0.1);
+        }
+
+        /* Payment Modal */
+        .payment-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .payment-instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            display: none; /* Hidden by default, shown after initiating payment */
+        }
+
+        .payment-instructions ol {
+            margin-left: 20px;
+        }
+
+        .payment-instructions li {
+            margin-bottom: 10px;
+        }
+
+        .razorpay-link { /* This will be updated to Cashfree payment link */
+            background: #528ff0;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .razorpay-link:hover {
+            background: #4285f4;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #999;
+        }
+
+        /* Mobile Responsive for Subscription Modal */
+        @media (max-width: 768px) {
+            .subscription-modal-content {
+                padding: 25px 20px;
+                margin: 0 10px;
+            }
+
+            .subscription-type-tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .subscription-type-tab {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+
+            .subscription-option {
+                padding: 20px 15px;
+            }
+
+            .subscription-option-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .subscription-duration {
+                font-size: 1.1rem;
+            }
+
+            .subscription-price {
+                font-size: 1.3rem;
+            }
+
+            .btn-continue-subscription {
+                padding: 12px 30px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .about-content {
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .navbar {
+                justify-content: space-between;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                padding: 20px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                z-index: 999;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: flex;
+                z-index: 1001;
+            }
+
+            .mobile-menu-section {
+                display: flex;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dashboard-user-info {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .dashboard-nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .dashboard-tabs {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .class-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .hero {
+                height: auto;
+                padding: 120px 0 80px;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            section {
+                padding: 60px 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .about-curved-container {
+                margin: 20px 0;
+                padding: 30px 20px;
+            }
+
+            .about-curved-title {
+                font-size: 2rem;
+            }
+
+            .dashboard-logo {
+                font-size: 2rem;
+            }
+
+            .welcome-note {
+                right: 10px;
+                max-width: 250px;
+            }
+
+            /* Subscription plans mobile responsiveness */
+            .subscription-tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .subscription-tab {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+
+            .demo-card {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+
+            .demo-price {
+                font-size: 2rem;
+            }
+
+            .subscription-card {
+                padding: 25px 20px;
+                margin: 0 10px;
+            }
+
+            .pricing-options {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .pricing-option.recommended {
+                transform: scale(1);
+                margin-bottom: 10px;
+            }
+
+            .plan-features ul {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-type {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .plan-type h4 {
+                font-size: 1.5rem;
+            }
+
+            .current-price {
+                font-size: 1.8rem;
+            }
+
+            .subscription-footer {
+                padding: 20px 15px;
+                margin: 30px 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Note -->
+    <div id="welcomeNote" class="welcome-note">
+        <button class="close-welcome" onclick="hideWelcomeNote()">&times;</button>
+        <h3>🙏 Welcome!</h3>
+        <p id="welcomeMessage">Welcome to Supravi Yoga! Ready to start your yoga journey?</p>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <a href="#" class="logo" onclick="showLandingPage()">
+                    <span class="logo-text">Supravi Yoga</span>
+                    <span class="logo-tagline">- Essence of Life</span>
+                </a>
+
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#home" onclick="showLandingPage()">Home</a></li>
+                    <li><a href="#about" onclick="showLandingPage()">About</a></li>
+                    <li><a href="#certificates" onclick="showLandingPage()">Certificates</a></li>
+                    <li><a href="#benefits" onclick="showLandingPage()">Benefits</a></li>
+                    <li><a href="#classes" onclick="showLandingPage()">Classes</a></li>
+                    <li><a href="#subscription" onclick="showLandingPage()">Subscription</a></li>
+                    <li><a href="#postures" onclick="showLandingPage()">Postures</a></li>
+                    <li><a href="#testimonials" onclick="showLandingPage()">Testimonials</a></li>
+
+                    <!-- Mobile Menu Sections -->
+                    <div class="mobile-menu-section" id="mobileGuestSection">
+                        <button class="btn" id="mobileLoginBtn">Login</button>
+                        <button class="btn btn-secondary" id="mobileSignupBtn">Sign Up</button>
+                    </div>
+
+                    <div class="mobile-menu-section" id="mobileUserSection" style="display: none;">
+                        <button class="btn" id="mobileDashboardBtn">Dashboard</button>
+                        <button class="btn btn-danger" id="mobileLogoutBtn">Logout</button>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Landing Page Content -->
+    <div id="landingPage">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Find Your Inner Peace with Supravi Yoga</h1>
+                    <p>Join our online yoga community and transform your body, mind, and spirit with expert guidance from certified instructor.</p>
+                    <a href="#classes" class="btn btn-secondary">Explore Classes</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <div class="about-curved-container">
+                    <h2 class="about-curved-title">About Supravi Yoga</h2>
+                    <div class="about-content">
+                        <div class="about-text">
+                            <p><strong>Supravi Yoga</strong> is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by <strong>Yoga Coach Chowdary Charitha</strong>, our studio brings together traditional wisdom and modern approaches to wellness.</p>
+                            <p>We believe that <strong>yoga is for everyone</strong> - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
+                            <p>At <strong>Supravi Yoga</strong>, we offer a variety of styles including <strong>Hatha, Ashtanga-Vinyasa, and specialized yoga classes</strong>. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
+                        </div>
+                        <div class="about-image">
+                            <img src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Certificates and Awards Section -->
+        <section id="certificates" class="certificates">
+            <div class="container">
+                <h2 class="section-title">Certificates & Awards</h2>
+                <div class="certificates-container">
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="200.jpg" alt="Yoga Alliance Certification">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Bodhi Yoga RYT-200 Certification</h3>
+                            <p>Registered Yoga Teacher with 200-hour certification from Bodhi Yoga,Yoga Alliance ensuring the highest standards of yoga instruction and practice.</p>
+                        </div>
+                    </div>
+
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="bt.jpg" alt="Excellence in Yoga Award">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Excellence in Yoga Teaching Award 2023</h3>
+                            <p>Recognized for outstanding contribution to yoga education and innovative teaching methodologies in the wellness community.</p>
+                        </div>
+                    </div>
+
+                    <div class="certificate-card">
+                        <div class="certificate-image">
+                            <img src="bst.jpg" alt="Meditation Certification">
+                        </div>
+                        <div class="certificate-content">
+                            <h3>Advanced Meditation & Mindfulness </h3>
+                            <p>Best Student in meditation techniques and mindfulness practices, enhancing the holistic yoga experience for all students.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section id="benefits" class="benefits">
+            <div class="container">
+                <h2 class="section-title">Benefits of Yoga</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Improves Flexibility</h3>
+                        <p>Yoga slowly stretches your muscles and increases your range of motion, helping you move more freely and with less pain.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Reduces Stress</h3>
+                        <p>Through meditation and breathing exercises, yoga helps calm the nervous system and quiet the mind, reducing anxiety and stress.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Builds Strength</h3>
+                        <p>Yoga poses require you to support the weight of your own body in new ways, building functional strength throughout your entire body.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <h3>Improves Posture</h3>
+                        <p>Yoga increases body awareness and strengthens core muscles, helping you maintain proper alignment in your daily activities.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <h3>Better Breathing</h3>
+                        <p>Pranayama (breath control) teaches you to take deeper, slower breaths which improves lung function and calms the body.</p>
+                    </div>
+
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <h3>Better Sleep</h3>
+                        <p>Regular yoga practice can help you fall asleep faster, sleep deeper, and wake up more refreshed by reducing stress and calming the mind.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Classes Section -->
+        <section id="classes" class="classes">
+            <div class="container">
+                <h2 class="section-title">Our Classes</h2>
+                <div class="classes-container">
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="hata.jpeg" alt="Hatha Yoga">
+                        </div>
+                        <div class="class-content">
+                            <h3>Hatha Yoga</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 60 min</span>
+                                <span><i class="fas fa-user"></i> All Levels</span>
+                            </div>
+                            <p>A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners seeking balance and mindfulness.</p>
+                            <button class="btn join-class-btn">Join Now</button>
+                        </div>
+                    </div>
+
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="as.webp" alt="Ashtanga Vinyasa Flow">
+                        </div>
+                        <div class="class-content">
+                            <h3>Ashtanga - Vinyasa Flow</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 60  min</span>
+                                <span><i class="fas fa-user"></i> Intermediate</span>
+                            </div>
+                            <p>A powerful and dynamic practice combining traditional Ashtanga sequences with flowing Vinyasa movements for strength and flexibility.</p>
+                            <button class="btn join-class-btn">Join Now</button>
+                        </div>
+                    </div>
+
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Regular Yoga Class">
+                        </div>
+                        <div class="class-content">
+                            <h3>Regular Yoga Class</h3>
+                            <div class="class-info">
+                                <span><i class="far fa-clock"></i> 60 min</span>
+                                <span><i class="fas fa-user"></i> All Levels</span>
+                            </div>
+                            <p>A comprehensive yoga class combining various styles and techniques to enhance overall wellness, flexibility, and inner peace.</p>
+                            <button class="btn join-class-btn">Join Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subscription Plans Section - Title Only -->
+        <section id="subscription" class="subscription-plans">
+            <div class="container">
+                <h2 class="section-title">Subscription Plans</h2>
+
+                <!-- Demo Class Offer -->
+                <div class="demo-offer">
+                    <div class="demo-card">
+                        <div class="demo-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <h3>Try Our Demo Class</h3>
+                        <div class="demo-price">₹100</div>
+                        <p>Experience our teaching style with a complete 60-minute session. Available once per user only!</p>
+                        <ul class="demo-features">
+                            <li><i class="fas fa-check"></i> Full 60-minute session</li>
+                            <li><i class="fas fa-check"></i> Professional guidance</li>
+                            <li><i class="fas fa-check"></i> One-time offer per user</li>
+                            <li><i class="fas fa-check"></i> Perfect introduction to yoga</li>
+                        </ul>
+                        <button class="btn btn-demo" onclick="showDemoTimeSelection()">Book Demo Class - ₹99</button>
+                    </div>
+                </div>
+
+                <div class="subscription-footer">
+                    <p><strong>🎁 Special Launch Offer:</strong> All new subscribers get a complimentary wellness consultation and personalized yoga assessment!</p>
+                    <div class="contact-info">
+                        <p>Have questions? Contact us at <strong>+91 7997142404</strong> or <strong>supraviyoga@gmail.com</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Yoga Postures Section -->
+        <section id="postures" class="postures">
+            <div class="container">
+                <h2 class="section-title">Yoga Postures & Benefits</h2>
+                <div class="postures-container">
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="adhomukhasan.jpeg" alt="Downward Facing Dog">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Downward Facing Dog (Adho Mukha Svanasana)</h3>
+                            <p class="posture-benefits">Strengthens arms and legs, stretches shoulders, hamstrings, and calves, calms the mind</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Fun Fact: This pose mimics how dogs naturally stretch, helping to energize the entire body while inverting the heart above the head!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="vriksha.jpg" alt="Tree Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Tree Pose (Vrikshasana)</h3>
+                            <p class="posture-benefits">Improves balance, strengthens thighs, calves, and spine, stretches groins and inner thighs</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-tree"></i>
+                                <span>Did you know? Practicing Tree Pose regularly can improve focus and concentration by training your mind to stay present and balanced.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="veera.jpg" alt="Warrior II">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Warrior II (Virabhadrasana II)</h3>
+                            <p class="posture-benefits">Strengthens legs and arms, increases stamina, improves balance and concentration</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-fist-raised"></i>
+                                <span>Ancient Wisdom: Named after the fierce warrior Virabhadra, this pose builds inner strength and confidence while teaching grace under pressure.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="bala.jpg" alt="Child's Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Child's Pose (Balasana)</h3>
+                            <p class="posture-benefits">Gently stretches hips, thighs, and ankles, relieves back and neck pain, calms the mind</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-heart"></i>
+                                <span>Healing Touch: This restorative pose activates the parasympathetic nervous system, naturally reducing stress hormones and promoting deep relaxation.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="bhujang.jpg" alt="Cobra Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Cobra Pose (Bhujangasana)</h3>
+                            <p class="posture-benefits">Strengthens the spine, stretches chest and lungs, improves flexibility of the upper and middle back</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                <span>Energy Boost: This backbend opens the heart chakra and can naturally boost energy levels while improving posture from daily sitting.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="posture-card">
+                        <div class="posture-image">
+                            <img src="setu.jpg" alt="Bridge Pose">
+                        </div>
+                        <div class="posture-content">
+                            <h3>Bridge Pose (Setu Bandhasana)</h3>
+                            <p class="posture-benefits">Stretches chest, neck, and spine, calms the brain, reduces anxiety, improves digestion</p>
+                            <div class="posture-fact">
+                                <i class="fas fa-brain"></i>
+                                <span>Mind-Body Connection: This gentle inversion increases blood flow to the brain, potentially improving memory and mental clarity.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="testimonials">
+            <div class="container">
+                <h2 class="section-title">What Our Students Say</h2>
+                <div class="testimonial-container">
+                    <div class="testimonial">
+                        <p class="testimonial-text">"Supravi Yoga has transformed my life. I've been practicing for 6 months and my flexibility, strength, and mental clarity have improved dramatically. The online classes are so convenient!"</p>
+                        <p class="testimonial-author">- Vasavi</p>
+                    </div>
+
+                    <div class="testimonial">
+                        <p class="testimonial-text">"The instructors at Supravi Yoga are incredible. They provide modifications for all levels and truly care about their students' progress. I've never felt stronger or more centered."</p>
+                        <p class="testimonial-author">- Sushmitha</p>
+                    </div>
+
+                    <div class="testimonial">
+                        <p class="testimonial-text">"As a beginner, I was nervous about starting yoga, but the welcoming environment and detailed instructions made me feel comfortable right away. Now I'm hooked!"</p>
+                        <p class="testimonial-author">- Naveen</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="dashboard">
+        <div class="dashboard-header">
+            <div class="container">
+                <div class="dashboard-title">
+                    <div class="dashboard-logo">Supravi Yoga</div>
+                </div>
+                <div class="dashboard-user-info">
+                    <div class="dashboard-user-profile">
+                        <div class="dashboard-user-avatar" id="dashboardUserAvatar"></div>
+                        <div class="dashboard-user-details">
+                            <div class="dashboard-user-name" id="dashboardUserName"></div>
+                            <div id="dashboardAdminIndicator" class="dashboard-admin-indicator" style="display: none;">🔥 ADMIN</div>
+                            <div id="dashboardOnlineCount" class="dashboard-online-count" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Admin Panel (only visible to admins) -->
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <h3 class="admin-title">🔥 Admin Control Panel 🔥</h3>
+                <div class="admin-controls">
+                    <div class="admin-section">
+                        <h4>📊 Statistics</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalUsers">0</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="onlineUsers">0</div>
+                                <div class="stat-label">Online Now</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalClasses">3</div>
+                                <div class="stat-label">Total Classes</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>➕ Add New Class</h4>
+                        <form class="admin-form" id="addClassForm">
+                            <input type="text" name="className" placeholder="Class Name" required>
+                            <textarea name="classDescription" placeholder="Class Description" rows="3" required></textarea>
+                            <input type="text" name="classDuration" placeholder="Duration (e.g., 60 min)" required>
+                            <input type="text" name="classLevel" placeholder="Level (e.g., Beginner)" required>
+                            <input type="number" name="classPrice" placeholder="Price" min="1" required>
+                            <input type="url" name="classImage" placeholder="Image URL" required>
+                            <input type="url" name="classZoomLink" placeholder="Zoom Link" required>
+                            <button type="submit">Add Class</button>
+                        </form>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>🔗 Update Zoom Links</h4>
+                        <form class="admin-form" id="updateZoomForm">
+                            <select id="zoomClassSelect" name="classId" required>
+                                <option value="">Select a class</option>
+                            </select>
+                            <input type="url" id="newZoomLink" name="newZoomLink" placeholder="New Zoom Link" required>
+                            <button type="submit">Update Zoom Link</button>
+                        </form>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>💰 Fee Management</h4>
+                        <div class="admin-fee-section">
+                            <div class="fee-management-grid">
+                                <div class="fee-item">
+                                    <span>Demo Class:</span>
+                                    <input type="number" id="demoFee" value="100" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Group Monthly (Current):</span>
+                                    <input type="number" id="groupMonthlyFee" value="1800" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Group Monthly (Original):</span>
+                                    <input type="number" id="groupMonthlyOriginalFee" value="3000" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Group Yearly (Current):</span>
+                                    <input type="number" id="groupYearlyFee" value="15120" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Group Yearly (Original):</span>
+                                    <input type="number" id="groupYearlyOriginalFee" value="36000" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Personal Monthly (Current):</span>
+                                    <input type="number" id="personalMonthlyFee" value="12800" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Personal Monthly (Original):</span>
+                                    <input type="number" id="personalMonthlyOriginalFee" value="16000" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Personal Session (Current):</span>
+                                    <input type="number" id="personalSessionFee" value="800" min="1">
+                                </div>
+                                <div class="fee-item">
+                                    <span>Personal Session (Original):</span>
+                                    <input type="number" id="personalSessionOriginalFee" value="1000" min="1">
+                                </div>
+                            </div>
+                            <button class="admin-form button" id="updateFeesBtn" style="margin-top: 15px; width: 100%;">Update Fees</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yoga Quotes Slider -->
+            <div class="yoga-quotes-container">
+                <div class="yoga-quote active">
+                    <div class="quote-text">"Yoga is not about touching your toes. It is about what you learn on the way down."</div>
+                    <div class="quote-author">- Judith Hanson Lasater</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"The success of yoga lies not in the ability to attain the pose, but in how it makes us better human beings."</div>
+                    <div class="quote-author">- B.K.S. Iyengar</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"Yoga is a light, which once lit will never dim. The better your practice, the brighter your flame."</div>
+                    <div class="quote-author">- B.K.S. Iyengar</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"The nature of yoga is to shine the light of awareness into the darkest corners of the body."</div>
+                    <div class="quote-author">- Jason Crandell</div>
+                </div>
+                <div class="yoga-quote">
+                    <div class="quote-text">"Yoga is not a work-out, it is a work-in. And this is the point of spiritual practice; to make us teachable."</div>
+                    <div class="quote-author">- Rolf Gates</div>
+                </div>
+            </div>
+
+            <nav class="dashboard-nav">
+                <div class="dashboard-tabs">
+                    <button class="dashboard-tab active" data-tab="available">Available Classes</button>
+                    <button class="dashboard-tab" data-tab="myclasses">My Classes</button>
+                    <button class="dashboard-tab" data-tab="profile">Profile</button>
+                    <button class="dashboard-tab" data-tab="payments">Payment History</button>
+                </div>
+            </nav>
+
+            <!-- Available Classes Tab -->
+            <div class="dashboard-content active" id="availableTab">
+                <div class="loading" id="classesLoading">
+                    <div class="spinner"></div>
+                    <p>Loading available classes...</p>
+                </div>
+                <div class="class-grid" id="userClasses">
+                    <!-- Classes will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- My Classes Tab -->
+            <div class="dashboard-content" id="myclassesTab">
+                <div class="loading" id="myClassesLoading">
+                    <div class="spinner"></div>
+                    <p>Loading your subscribed classes...</p>
+                </div>
+                <div class="class-grid" id="myClassesList">
+                    <!-- Subscribed classes will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="dashboard-content" id="profileTab">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div class="profile-avatar-section">
+                            <div class="profile-avatar" id="profileAvatar" onclick="triggerProfileUpload()"></div>
+                            <input type="file" id="profileAvatarUpload" class="profile-avatar-upload" accept="image/*" onchange="uploadProfilePicture(event)">
+                            <button class="profile-avatar-button" onclick="triggerProfileUpload()">
+                                <i class="fas fa-camera"></i> Change Photo
+                            </button>
+                        </div>
+                        <div class="profile-info">
+                            <h3>Profile Information</h3>
+                            <p style="color: #666; margin-bottom: 20px;">Manage your account details and profile picture</p>
+                        </div>
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="profileName">Full Name</label>
+                            <input type="text" id="profileName" placeholder="Enter your full name">
+                            <small style="color: #666; font-size: 0.9rem;">Click to edit your name</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" readonly>
+                        </div>
+                        <button type="button" class="btn" id="saveProfileBtn" style="display: none;">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payments Tab -->
+            <div class="dashboard-content" id="paymentsTab">
+                <div class="payment-history">
+                    <h3>Payment History</h3>
+                    <div id="paymentList">
+                        <p>No payment history available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="auth-form">
+                <h2>Login to Your Account</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Login</button>
+                    <div class="error-message" id="loginError"></div>
+                    <div class="success-message" id="loginSuccess"></div>
+                    <div class="form-footer">
+                        <p>Don't have an account? <a href="#" id="switchToSignup">Sign Up</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="auth-form">
+                <h2>Create an Account</h2>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupConfirmPassword">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn" id="sendOtpBtn" style="width: 100%;">Send OTP</button>
+
+                    <div class="otp-section" id="otpSection">
+                        <div class="form-group">
+                            <label for="otpInput">Enter OTP</label>
+                            <input type="text" id="otpInput" class="otp-input" maxlength="6" placeholder="000000" required>
+                        </div>
+                        <button type="button" class="btn" id="verifyOtpBtn" style="width: 100%;">Verify OTP & Sign Up</button>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span class="resend-otp" id="resendOtp">Resend OTP</span>
+                        </div>
+                    </div>
+
+                    <div class="error-message" id="signupError"></div>
+                    <div class="success-message" id="signupSuccess"></div>
+                    <div class="form-footer">
+                        <p>Already have an account? <a href="#" id="switchToLogin">Login</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Selection Modal -->
+    <div class="subscription-modal" id="subscriptionModal">
+        <div class="subscription-modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="subscription-modal-header">
+                <h2>Choose Your Plan</h2>
+                <p id="selectedClassName">Select the perfect subscription for your yoga journey</p>
+            </div>
+
+            <div class="subscription-type-tabs">
+                <button class="subscription-type-tab active" data-type="group">
+                    <i class="fas fa-users"></i> Group Classes
+                </button>
+                <button class="subscription-type-tab" data-type="personal">
+                    <i class="fas fa-user"></i> Personal Sessions
+                </button>
+            </div>
+
+            <!-- Group Classes Plans -->
+            <div class="subscription-plan-content active" id="groupSubscription">
+                <div class="subscription-plan-header">
+                    <h3>Group Classes</h3>
+                    <p>Join our vibrant community classes with fellow yoga enthusiasts</p>
+                </div>
+
+                <div class="subscription-options">
+                    <div class="subscription-option" data-plan="group-yearly">
+                        <div class="subscription-option-header">
+                            <div class="subscription-duration">Yearly Plan</div>
+                            <div class="subscription-price">
+                                <span class="original-price">₹36,000</span>
+                                <span class="current-price">₹15,120</span>
+                            </div>
+                        </div>
+                        <div class="subscription-savings">Save 58% • ₹1,260/month</div>
+                        <ul class="subscription-features">
+                            <li><i class="fas fa-check"></i> Gaining confidence</li>
+                            <li><i class="fas fa-check"></i> Live interactive sessions</li>
+                            <li><i class="fas fa-check"></i> Professional guidance</li>
+                            <li><i class="fas fa-check"></i> Community support</li>
+                        </ul>
+                    </div>
+
+                    <div class="subscription-option" data-plan="group-monthly">
+                        <div class="subscription-option-header">
+                            <div class="subscription-duration">Monthly Plan</div>
+                            <div class="subscription-price">
+                                <span class="original-price">₹3,000</span>
+                                <span class="current-price">₹1,800</span>
+                            </div>
+                        </div>
+                        <div class="subscription-savings">Save 40%</div>
+                        <ul class="subscription-features">
+                            <li><i class="fas fa-check"></i> Gaining confidence </li>
+                            <li><i class="fas fa-check"></i> Live interactive sessions</li>
+                            <li><i class="fas fa-check"></i> Professional guidance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Sessions Plans -->
+            <div class="subscription-plan-content" id="personalSubscription">
+                <div class="subscription-plan-header">
+                    <h3>Personal Sessions</h3>
+                    <p>Get personalized attention with one-on-one sessions</p>
+                </div>
+
+                <div class="subscription-options">
+                    <div class="subscription-option" data-plan="personal-monthly">
+                        <div class="subscription-option-header">
+                            <div class="subscription-duration">Monthly Package</div>
+                            <div class="subscription-price">
+                                <span class="original-price">₹16,000</span>
+                                <span class="current-price">₹12,800</span>
+                            </div>
+                        </div>
+                        <div class="subscription-savings">Save 20%</div>
+                        <ul class="subscription-features">
+                            <li><i class="fas fa-check"></i> One-on-one personalized sessions</li>
+                            <li><i class="fas fa-check"></i> Customized yoga sequences</li>
+                            <li><i class="fas fa-check"></i> Individual attention</li>
+                            <li><i class="fas fa-check"></i> Flexible scheduling</li>
+                        </ul>
+                    </div>
+
+                    <div class="subscription-option" data-plan="personal-session">
+                        <div class="subscription-option-header">
+                            <div class="subscription-duration">Per Session</div>
+                            <div class="subscription-price">
+                                <span class="original-price">₹1,000</span>
+                                <span class="current-price">₹800</span>
+                            </div>
+                        </div>
+                        <div class="subscription-savings">Save 20%</div>
+                        <ul class="subscription-features">
+                            <li><i class="fas fa-check"></i> Single personalized session</li>
+                            <li><i class="fas fa-check"></i> Customized for your goals</li>
+                            <li><i class="fas fa-check"></i> Flexible timing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subscription-modal-footer">
+                <button class="btn-continue-subscription" id="continueSubscriptionBtn" disabled>
+                    Continue with Selected Plan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Time Selection Modal -->
+    <div class="modal" id="demoTimeModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="demo-selection">
+                <h2>Book Your Demo Class</h2>
+                <p>Select your preferred time slot and date for the demo class</p>
+
+                <div class="form-group">
+                    <label for="demoDate">Select Date</label>
+                    <input type="date" id="demoDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Time Slot</label>
+                    <div class="time-slots">
+                        <div class="time-slot" data-time="5-8am">
+                            <input type="radio" name="timeSlot" value="5-8am" id="slot1">
+                            <label for="slot1">5:00 AM - 8:00 AM</label>
+                        </div>
+                        <div class="time-slot" data-time="5-7pm">
+                            <input type="radio" name="timeSlot" value="5-7pm" id="slot2">
+                            <label for="slot2">5:00 PM - 7:00 PM</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" id="confirmDemoBooking" style="width: 100%; margin-top: 20px;">
+                    Proceed to Payment - ₹100
+                </button>
+
+                <div class="error-message" id="demoError"></div>
+                <div class="success-message" id="demoSuccess"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="payment-info">
+                <h2>Complete Payment</h2>
+                <div id="paymentPlanDetails"></div>
+                <div class="payment-amount" id="paymentAmount">₹0</div>
+                <p>Complete the payment to unlock your selected plan and get access to live Zoom sessions!</p>
+
+                <button class="btn" id="confirmPaymentBtn" style="width: 100%; margin-top: 20px;">
+                    Pay Now
+                </button>
+
+                <div class="loading" id="paymentLoading">
+                    <div class="spinner"></div>
+                    <p>Processing your payment...</p>
+                </div>
+
+                <div class="error-message" id="paymentError"></div>
+                <div class="success-message" id="paymentSuccess"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="mainFooter">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Supravi Yoga</h3>
+                    <p>Find your balance, peace, and happiness through the ancient practice of yoga.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home" onclick="showLandingPage()">Home</a></li>
+                        <li><a href="#about" onclick="showLandingPage()">About</a></li>
+                        <li><a href="#certificates" onclick="showLandingPage()">Certificates</a></li>
+                        <li><a href="#benefits" onclick="showLandingPage()">Benefits</a></li>
+                        <li><a href="#classes" onclick="showLandingPage()">Classes</a></li>
+                        <li><a href="#subscription" onclick="showLandingPage()">Subscription</a></li>
+                        <li><a href="#postures" onclick="showLandingPage()">Postures</a></li>
+                        <li><a href="#testimonials" onclick="showLandingPage()">Testimonials</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Supraviyoga, Hyderabad</li>
+                        <li><i class="fas fa-phone"></i> +91 7997142404</li>
+                        <li><i class="fas fa-envelope"></i> supraviyoga@gmail.com</li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Newsletter</h3>
+                    <p>Subscribe to our newsletter for tips, updates, and special offers.</p>
+                    <form>
+                        <div class="form-group">
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+                        <button type="submit" class="btn">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2025 Supravi Yoga. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize EmailJS with your service credentials
+        emailjs.init('JMF-_icoUbndhxlSq');
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtc95WGLAhBvOQT3mMAOe8yyPMcyYrffM",
+            authDomain: "supravi-yoga.firebaseapp.com",
+            projectId: "supravi-yoga",
+            storageBucket: "supravi-yoga.firebasestorage.app",
+            messagingSenderId: "849453703842",
+            appId: "1:849453703842:web:b5205883d23034c420edfb",
+            measurementId: "G-5X5L4N2GQH"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const analytics = firebase.analytics();
+
+        // Configure Firestore with relaxed security rules for admin operations
+        db.settings({
+            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+        });
+
+        // Track page view
+        analytics.logEvent('page_view', {
+            page_title: 'Supravi Yoga Home',
+            page_location: window.location.href
+        });
+
+        // Admin emails
+        const adminEmails = ['supraviyoga@gmail.com', 'vishallnareddy@gmail.com'];
+
+        // Global variables for OTP and payment
+        let generatedOtp = '';
+        let pendingSignupData = null;
+        let currentPaymentClass = null;
+        let selectedSubscriptionPlan = null;
+        let currentUser = null;
+        let isAdmin = false;
+        let subscriptionPlans = {};
+        window.currentOrderId = null; // Initialize to null
+
+        // Yoga quotes rotation
+        let currentQuoteIndex = 0;
+        let quoteInterval;
+        let onlineUsersInterval;
+
+        // Backend API URLs - Using Firebase Functions
+        const API_BASE_URL = 'https://api-w6jwkvmcsa-uc.a.run.app'; // Updated to use the actual deployed Function URL
+
+        // Check for payment success on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment_success') === 'true' && urlParams.get('order_id')) {
+                const orderId = urlParams.get('order_id');
+                // Auto-verify payment if user is logged in
+                if (auth.currentUser) {
+                    handlePaymentReturn(orderId);
+                }
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        // Handle payment return from Cashfree
+        async function handlePaymentReturn(orderId) {
+            if (!orderId) return;
+
+            try {
+                const verificationResult = await verifyPayment(orderId);
+                if (verificationResult.success && verificationResult.data.paymentStatus === 'SUCCESS') {
+                    // Show success message
+                    showWelcomeNote('Payment successful! Your subscription has been activated.');
+                    
+                    // Update user's subscription based on payment
+                    if (currentUser) {
+                        // For demo payments, confirm booking
+                        const demoBookings = await db.collection('demo_bookings')
+                            .where('orderId', '==', orderId)
+                            .get();
+                        
+                        if (!demoBookings.empty) {
+                            demoBookings.forEach(doc => {
+                                db.collection('demo_bookings').doc(doc.id).update({
+                                    status: 'confirmed',
+                                    paymentConfirmed: true,
+                                    paymentDate: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            });
+                        } else {
+                            // Regular subscription - unlock classes
+                            const payments = await db.collection('payments')
+                                .where('orderId', '==', orderId)
+                                .get();
+                            
+                            if (!payments.empty) {
+                                payments.forEach(async (doc) => {
+                                    const paymentData = doc.data();
+                                    if (paymentData.classId) {
+                                        await unlockClassForUser(currentUser.uid, paymentData.classId);
+                                    }
+                                });
+                            }
+                        }
+                        
+                        if (userDashboard.classList.contains('active')) {
+                            loadUserDashboard();
+                        } else {
+                            showDashboard();
+                        }
+                    }
+                } else {
+                    console.warn('Payment verification failed:', verificationResult.message);
+                }
+            } catch (error) {
+                console.error('Error handling payment return:', error);
+            }
+        }
+
+        function rotateQuotes() {
+            const quotes = document.querySelectorAll('.yoga-quote');
+            if (quotes.length === 0) return;
+
+            quotes.forEach(quote => quote.classList.remove('active'));
+
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            quotes[currentQuoteIndex].classList.add('active');
+        }
+
+        function startQuoteRotation() {
+            if (quoteInterval) clearInterval(quoteInterval);
+            quoteInterval = setInterval(rotateQuotes, 4000);
+        }
+
+        function stopQuoteRotation() {
+            if (quoteInterval) {
+                clearInterval(quoteInterval);
+                quoteInterval = null;
+            }
+        }
+
+        // Welcome Note Functions
+        function showWelcomeNote(message, userName = '') {
+            const welcomeNote = document.getElementById('welcomeNote');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+
+            if (userName) {
+                welcomeMessage.textContent = `Welcome back, ${userName}! Ready to continue your yoga journey?`;
+            } else {
+                welcomeMessage.textContent = message || 'Welcome to Supravi Yoga! Ready to start your yoga journey?';
+            }
+
+            welcomeNote.classList.remove('hide');
+            welcomeNote.classList.add('show');
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideWelcomeNote();
+            }, 5000);
+        }
+
+        function hideWelcomeNote() {
+            const welcomeNote = document.getElementById('welcomeNote');
+            welcomeNote.classList.remove('show');
+            welcomeNote.classList.add('hide');
+        }
+
+        // Class data with Zoom links - now stored in Firestore
+        let classesData = [
+            {
+                id: 'demo-class',
+                name: 'Demo Class',
+                description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
+                duration: '60 min',
+                level: 'All Levels',
+                price: 100,
+                image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
+                isDemo: true
+            },
+            {
+                id: 'hatha-yoga',
+                name: 'Hatha Yoga',
+                description: 'A classic approach to yoga that focuses on posture and breathing techniques. Perfect for beginners seeking balance and mindfulness.',
+                duration: '60 min',
+                level: 'All Levels',
+                price: 1,
+                image: 'hata.jpeg',
+                zoomLink: 'https://zoom.us/j/1234567890?pwd=example1'
+            },
+            {
+                id: 'ashtanga-vinyasa-flow',
+                name: 'Ashtanga - Vinyasa Flow',
+                description: 'A powerful and dynamic practice combining traditional Ashtanga sequences with flowing Vinyasa movements for strength and flexibility.',
+                duration: '60 min',
+                level: 'Intermediate',
+                price: 1,
+                image: 'as.webp',
+                zoomLink: 'https://zoom.us/j/1234567891?pwd=example2'
+            },
+            {
+                id: 'yoga-class',
+                name: 'Regular Yoga Class',
+                description: 'A comprehensive yoga class combining various styles and techniques to enhance overall wellness, flexibility, and inner peace.',
+                duration: '60 min',
+                level: 'All Levels',
+                price: 1,
+                image: 'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                zoomLink: 'https://zoom.us/j/1234567892?pwd=example3'
+            }
+        ];
+
+        // Initialize subscription plans
+        async function initializeSubscriptionPlans() {
+            try {
+                const plansDoc = await db.collection('subscription_plans').doc('default').get();
+                if (!plansDoc.exists) {
+                    // Initialize with default plans
+                    const defaultPlans = {
+                        demo: 100,
+                        groupMonthly: 1800,
+                        groupMonthlyOriginal: 3000,
+                        groupYearly: 15120,
+                        groupYearlyOriginal: 36000,
+                        personalMonthly: 12800,
+                        personalMonthlyOriginal: 16000,
+                        personalSession: 800,
+                        personalSessionOriginal: 1000
+                    };
+                    await db.collection('subscription_plans').doc('default').set(defaultPlans);
+                    subscriptionPlans = defaultPlans;
+                } else {
+                    subscriptionPlans = plansDoc.data();
+                }
+            } catch (error) {
+                console.error('Error initializing subscription plans:', error);
+                // Fallback to default values
+                subscriptionPlans = {
+                    demo: 100,
+                    groupMonthly: 1800,
+                    groupMonthlyOriginal: 3000,
+                    groupYearly: 15120,
+                    groupYearlyOriginal: 36000,
+                    personalMonthly: 12800,
+                    personalMonthlyOriginal: 16000,
+                    personalSession: 800,
+                    personalSessionOriginal: 1000
+                };
+            }
+        }
+
+        // Initialize Firestore classes collection with default data
+        async function initializeClasses() {
+            try {
+                // Always ensure demo class exists first
+                const demoClass = {
+                    id: 'demo-class',
+                    name: 'Demo Class',
+                    description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
+                    duration: '60 min',
+                    level: 'All Levels',
+                    price: 100,
+                    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
+                    isDemo: true
+                };
+
+                await db.collection('classes').doc('demo-class').set(demoClass, { merge: true });
+
+                const classesCollection = await db.collection('classes').get();
+                const firestoreClasses = [];
+                classesCollection.forEach(doc => {
+                    firestoreClasses.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                // If no other classes exist, add default ones
+                if (firestoreClasses.length === 1) {
+                    const defaultClasses = classesData.filter(c => c.id !== 'demo-class');
+                    for (const classData of defaultClasses) {
+                        await db.collection('classes').doc(classData.id).set(classData);
+                        firestoreClasses.push(classData);
+                    }
+                    console.log('Classes initialized in Firestore');
+                }
+
+                classesData = firestoreClasses;
+            } catch (error) {
+                console.error('Error initializing classes:', error);
+            }
+        }
+
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+        const mobileSignupBtn = document.getElementById('mobileSignupBtn');
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const mobileDashboardBtn = document.getElementById('mobileDashboardBtn');
+
+        const loginModal = document.getElementById('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        const subscriptionModal = document.getElementById('subscriptionModal');
+        const paymentModal = document.getElementById('paymentModal');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        const switchToLogin = document.getElementById('switchToLogin');
+        const switchToSignup = document.getElementById('switchToSignup');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginError = document.getElementById('loginError');
+        const loginSuccess = document.getElementById('loginSuccess');
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        const otpSection = document.getElementById('otpSection');
+        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+        const otpInput = document.getElementById('otpInput');
+        const resendOtp = document.getElementById('resendOtp');
+
+        // Dashboard elements
+        const landingPage = document.getElementById('landingPage');
+        const userDashboard = document.getElementById('userDashboard');
+        const dashboardTabs = document.querySelectorAll('.dashboard-tab');
+        const dashboardContents = document.querySelectorAll('.dashboard-content');
+        const userClasses = document.getElementById('userClasses');
+        const classesLoading = document.getElementById('classesLoading');
+
+        // Profile elements
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileAvatarUpload = document.getElementById('profileAvatarUpload');
+
+        // Payment elements
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const paymentLoading = document.getElementById('paymentLoading');
+        const paymentError = document.getElementById('paymentError');
+        const paymentSuccess = document.getElementById('paymentSuccess');
+
+        // Admin elements
+        const adminPanel = document.getElementById('adminPanel');
+        const addClassForm = document.getElementById('addClassForm');
+        const updateZoomForm = document.getElementById('updateZoomForm');
+        const zoomClassSelect = document.getElementById('zoomClassSelect');
+        const totalUsersSpan = document.getElementById('totalUsers');
+        const onlineUsersSpan = document.getElementById('onlineUsers');
+
+        // Generate random OTP
+        function generateOtp() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Send OTP via EmailJS
+        function sendOtpEmail(email, name, otp) {
+            const templateParams = {
+                to_email: email,
+                to_name: name,
+                otp_code:otp,
+                from_name: 'Supravi Yoga'
+            };
+
+            return emailjs.send('service_w4px03n', 'template_0lwjboh', templateParams);
+        }
+
+        // Check if user is admin
+        function checkAdminStatus(email) {
+            return adminEmails.includes(email);
+        }
+
+        // Update authentication UI
+        function updateAuthUI(isLoggedIn) {
+            const mobileGuestSection = document.getElementById('mobileGuestSection');
+            const mobileUserSection = document.getElementById('mobileUserSection');
+
+            if (isLoggedIn) {
+                mobileGuestSection.style.display = 'none';
+                mobileUserSection.style.display = 'flex';
+            } else {
+                mobileGuestSection.style.display = 'flex';
+                mobileUserSection.style.display = 'none';
+            }
+        }
+
+        // Update user online status
+        async function updateOnlineStatus(userId, isOnline) {
+            try {
+                if (isOnline) {
+                    await db.collection('online_users').doc(userId).set({
+                        email: currentUser.email,
+                        name: currentUser.displayName || currentUser.email,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await db.collection('online_users').doc(userId).delete();
+                }
+            } catch (error) {
+                console.error('Error updating online status:', error);
+            }
+        }
+
+        // Get online users count
+        async function getOnlineUsersCount() {
+            try {
+                const onlineUsersSnapshot = await db.collection('online_users').get();
+                return onlineUsersSnapshot.size;
+            } catch (error) {
+                console.error('Error getting online users count:', error);
+                return 0;
+            }
+        }
+
+        // Get total users count
+        async function getTotalUsersCount() {
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                return usersSnapshot.size;
+            } catch (error) {
+                console.error('Error getting total users count:', error);
+                return 0;
+            }
+        }
+
+        // Update admin statistics
+        async function updateAdminStats() {
+            if (!isAdmin) return;
+
+            const totalUsers = await getTotalUsersCount();
+            const onlineUsers = await getOnlineUsersCount();
+
+            totalUsersSpan.textContent = totalUsers;
+            onlineUsersSpan.textContent = onlineUsers;
+
+            const dashboardOnlineCount = document.getElementById('dashboardOnlineCount');
+            if (onlineUsers > 0) {
+                dashboardOnlineCount.textContent = `👥 ${onlineUsers} online`;
+                dashboardOnlineCount.style.display = 'inline-block';
+            } else {
+                dashboardOnlineCount.style.display = 'none';
+            }
+        }
+
+        // Initialize user data in Firestore
+        async function initializeUserData(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+
+                if (!userDoc.exists) {
+                    await db.collection('users').doc(user.uid).set({
+                        name: user.displayName || '',
+                        email: user.email,
+                        profilePicture: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        unlockedClasses: [],
+                        paymentHistory: []
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing user data:', error);
+            }
+        }
+
+        // Update user name in Firestore
+        async function updateUserName(userId, newName) {
+            try {
+                await db.collection('users').doc(userId).update({
+                    name: newName
+                });
+
+                if (auth.currentUser) {
+                    await auth.currentUser.updateProfile({
+                        displayName: newName
+                    });
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error updating user name:', error);
+                return false;
+            }
+        }
+
+        // Profile picture functions
+        function triggerProfileUpload() {
+            profileAvatarUpload.click();
+        }
+
+        async function uploadProfilePicture(event) {
+            const file = event.target.files[0];
+            if (!file || !auth.currentUser) return;
+
+            // Check file size (max 2MB for better compatibility)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size should be less than 2MB');
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            try {
+                // Show loading state
+                profileAvatar.style.opacity = '0.5';
+
+                // Convert image to base64 and store in Firestore instead of Storage
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const base64Image = e.target.result;
+
+                        // Update user document with base64 image
+                        await db.collection('users').doc(auth.currentUser.uid).update({
+                            profilePicture: base64Image
+                        });
+
+                        // Update UI
+                        updateProfilePicture(base64Image);
+                        profileAvatar.style.opacity = '1';
+
+                        alert('Profile picture updated successfully!');
+
+                    } catch (error) {
+                        console.error('Error saving profile picture:', error);
+                        alert('Failed to save profile picture. Please try again.');
+                        profileAvatar.style.opacity = '1';
+                    }
+                };
+
+                reader.onerror = function() {
+                    console.error('Error reading file');
+                    alert('Failed to read image file. Please try again.');
+                    profileAvatar.style.opacity = '1';
+                };
+
+                reader.readAsDataURL(file);
+
+            } catch (error) {
+                console.error('Error uploading profile picture:', error);
+                alert('Failed to upload profile picture. Please try again.');
+                profileAvatar.style.opacity = '1';
+            }
+        }
+
+        function updateProfilePicture(imageUrl) {
+            // Update profile avatar in profile section
+            if (imageUrl) {
+                profileAvatar.style.backgroundImage = `url(${imageUrl})`;
+                profileAvatar.style.backgroundSize = 'cover';
+                profileAvatar.style.backgroundPosition = 'center';
+                profileAvatar.textContent = '';
+            }
+
+            // Update dashboard avatar
+            const dashboardAvatar = document.getElementById('dashboardUserAvatar');
+            if (dashboardAvatar && imageUrl) {
+                dashboardAvatar.style.backgroundImage = `url(${imageUrl})`;
+                dashboardAvatar.style.backgroundSize = 'cover';
+                dashboardAvatar.style.backgroundPosition = 'center';
+                dashboardAvatar.textContent = '';
+            }
+        }
+
+        // Get user's unlocked classes
+        async function getUserUnlockedClasses(userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    return userDoc.data().unlockedClasses || [];
+                }
+                return [];
+            } catch (error) {
+                console.error('Error getting unlocked classes:', error);
+                return [];
+            }
+        }
+
+        // Check if user has already booked demo class
+        async function hasUserBookedDemo(userId) {
+            try {
+                const demoBookings = await db.collection('demo_bookings')
+                    .where('userId', '==', userId)
+                    .where('status', '==', 'confirmed')
+                    .get();
+                return !demoBookings.empty;
+            } catch (error) {
+                console.error('Error checking demo booking:', error);
+                return false;
+            }
+        }
+
+        // Unlock a class for user
+        async function unlockClassForUser(userId, classId) {
+            try {
+                const userRef = db.collection('users').doc(userId);
+
+                await userRef.update({
+                    unlockedClasses: firebase.firestore.FieldValue.arrayUnion(classId),
+                    paymentHistory: firebase.firestore.FieldValue.arrayUnion({
+                        classId: classId,
+                        className: classesData.find(c => c.id === classId)?.name || 'Unknown',
+                        amount: 1,
+                        date: firebase.firestore.FieldValue.serverTimestamp(),
+                        paymentMethod: 'Cashfree' // Updated payment method
+                    })
+                });
+
+                analytics.logEvent('class_unlocked', {
+                    user_id: userId,
+                    class_id: classId
+                });
+
+                return true;
+            } catch (error) {
+                console.error('Error unlocking class:', error);
+                return false;
+            }
+        }
+
+        // Add new class (admin only)
+        async function addClass(classData) {
+            try {
+                if (!isAdmin) {
+                    throw new Error('Admin access required');
+                }
+
+                const classId = classData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                const classDoc = {
+                    ...classData,
+                    id: classId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('classes').doc(classId).set(classDoc);
+
+                // Update local classes data
+                classesData.push({
+                    id: classId,
+                    ...classData
+                });
+
+                // Update total classes count
+                document.getElementById('totalClasses').textContent = classesData.length;
+
+                return true;
+            } catch (error) {
+                console.error('Error adding class:', error);
+                return false;
+            }
+        }
+
+        // Update zoom link (admin only)
+        async function updateZoomLink(classId, newZoomLink) {
+            try {
+                if (!isAdmin) {
+                    throw new Error('Admin access required');
+                }
+
+                await db.collection('classes').doc(classId).update({
+                    zoomLink: newZoomLink
+                });
+
+                // Update local classes data
+                const classIndex = classesData.findIndex(c => c.id === classId);
+                if (classIndex !== -1) {
+                    classesData[classIndex].zoomLink = newZoomLink;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error updating zoom link:', error);
+                return false;
+            }
+        }
+
+        // Show/Hide Dashboard
+        function showDashboard() {
+            landingPage.style.display = 'none';
+            document.getElementById('mainFooter').style.display = 'none';
+            userDashboard.classList.add('active');
+            startQuoteRotation();
+            loadUserDashboard();
+            navLinks.classList.remove('active');
+        }
+
+        function showLandingPage() {
+            landingPage.style.display = 'block';
+            document.getElementById('mainFooter').style.display = 'block';
+            userDashboard.classList.remove('active');
+            stopQuoteRotation();
+            navLinks.classList.remove('active');
+        }
+
+        // Load user dashboard data
+        async function loadUserDashboard() {
+            if (!auth.currentUser) return;
+
+            // Update welcome message with user name
+            const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+            const displayName = userData.name || auth.currentUser.displayName || auth.currentUser.email.split('@')[0];
+
+            document.getElementById('dashboardUserName').textContent = displayName;
+
+            // Update dashboard avatar
+            const dashboardAvatar = document.getElementById('dashboardUserAvatar');
+            if (userData.profilePicture) {
+                updateProfilePicture(userData.profilePicture);
+            } else {
+                dashboardAvatar.textContent = displayName.charAt(0).toUpperCase();
+                dashboardAvatar.style.backgroundImage = 'none';
+            }
+
+            // Show admin indicator if user is admin
+            if (isAdmin) {
+                document.getElementById('dashboardAdminIndicator').style.display = 'inline-block';
+                adminPanel.style.display = 'block';
+                updateAdminStats();
+                updateZoomClassSelect();
+            }
+
+            // Load classes from Firestore
+            await loadClasses();
+
+            classesLoading.style.display = 'block';
+            const unlockedClasses = await getUserUnlockedClasses(auth.currentUser.uid);
+
+            // Render classes
+            userClasses.innerHTML = '';
+
+            // Check if user has booked demo class
+            const hasBookedDemo = await hasUserBookedDemo(auth.currentUser.uid);
+
+            // Ensure demo class is present and sorted
+            const demoClassIndex = classesData.findIndex(c => c.id === 'demo-class');
+            let demoClassData = classesData[demoClassIndex];
+
+            if (!demoClassData) {
+                demoClassData = {
+                    id: 'demo-class',
+                    name: 'Demo Class',
+                    description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
+                    duration: '60 min',
+                    level: 'All Levels',
+                    price: subscriptionPlans.demo || 100, // Use plan price
+                    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
+                    isDemo: true
+                };
+                classesData.unshift(demoClassData); // Add to beginning
+            } else {
+                // Update demo class price if it changed
+                demoClassData.price = subscriptionPlans.demo || 100;
+            }
+
+            // Sort classes to put demo class first
+            const sortedClasses = [...classesData].sort((a, b) => {
+                if (a.isDemo && !b.isDemo) return -1;
+                if (!a.isDemo && b.isDemo) return 1;
+                return 0;
+            });
+
+            sortedClasses.forEach(classData => {
+                const isUnlocked = unlockedClasses.includes(classData.id);
+                const isDemoClass = classData.isDemo;
+                const canBookDemo = isDemoClass ? !hasBookedDemo : true;
+
+                const classCard = document.createElement('div');
+                classCard.className = 'dashboard-class-card';
+
+                let buttonContent = '';
+                if (isUnlocked) {
+                    buttonContent = `<a href="${classData.zoomLink}" target="_blank" class="zoom-link">
+                        <i class="fas fa-video"></i> Join Zoom Class
+                    </a>`;
+                } else if (isDemoClass && !canBookDemo) {
+                    buttonContent = `<button class="btn btn-disabled" disabled>
+                        Demo Already Used
+                    </button>`;
+                } else if (isDemoClass) {
+                    buttonContent = `<button class="btn demo-book-btn" data-class-id="${classData.id}">
+                        Book Demo - ₹${classData.price}
+                    </button>`;
+                } else {
+                    buttonContent = `<button class="btn unlock-class-btn" data-class-id="${classData.id}">
+                        Join Now
+                    </button>`;
+                }
+
+                classCard.innerHTML = `
+                    <img src="${classData.image}" alt="${classData.name}">
+                    <div class="dashboard-card-content">
+                        <span class="class-status ${isUnlocked ? 'status-unlocked' : (isDemoClass && !canBookDemo ? 'status-locked' : 'status-locked')}">
+                            ${isUnlocked ? '✅ Unlocked' : (isDemoClass && !canBookDemo ? '❌ Demo Used' : '🔒 Locked')}
+                        </span>
+                        <h3>${classData.name}</h3>
+                        <p>${classData.description}</p>
+                        <div class="class-info">
+                            <span><i class="far fa-clock"></i> ${classData.duration}</span>
+                            <span><i class="fas fa-user"></i> ${classData.level}</span>
+                        </div>
+                        ${buttonContent}
+                        ${isAdmin ?
+                            `<a href="${classData.zoomLink}" target="_blank" class="admin-zoom-link">
+                                <i class="fas fa-crown"></i> Admin Access
+                            </a>` : ''
+                        }
+                    </div>
+                `;
+
+                userClasses.appendChild(classCard);
+            });
+
+            // Add event listeners to unlock buttons
+            document.querySelectorAll('.unlock-class-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const classId = e.target.getAttribute('data-class-id');
+                    showSubscriptionModal(classId);
+                });
+            });
+
+            // Add event listeners to demo booking buttons
+            document.querySelectorAll('.demo-book-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showDemoTimeSelection();
+                });
+            });
+
+            classesLoading.style.display = 'none';
+
+            // Update profile info
+            profileName.value = userData.name || auth.currentUser.displayName || '';
+            profileEmail.value = auth.currentUser.email || '';
+
+            // Update profile avatar
+            if (userData.profilePicture) {
+                updateProfilePicture(userData.profilePicture);
+            } else {
+                profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+                profileAvatar.style.backgroundImage = 'none';
+            }
+        }
+
+        // Load classes from Firestore
+        async function loadClasses() {
+            try {
+                const classesSnapshot = await db.collection('classes').get();
+                const firestoreClasses = [];
+                classesSnapshot.forEach(doc => {
+                    firestoreClasses.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                // Ensure demo class is present
+                const demoClassExists = firestoreClasses.findIndex(c => c.id === 'demo-class');
+                if (demoClassExists === -1) {
+                    const defaultDemoClass = {
+                        id: 'demo-class',
+                        name: 'Demo Class',
+                        description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
+                        duration: '60 min',
+                        level: 'All Levels',
+                        price: subscriptionPlans.demo || 100,
+                        image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                        zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
+                        isDemo: true
+                    };
+                    await db.collection('classes').doc('demo-class').set(defaultDemoClass);
+                    firestoreClasses.unshift(defaultDemoClass);
+                } else {
+                    // Update price if changed
+                    firestoreClasses[demoClassExists].price = subscriptionPlans.demo || 100;
+                }
+
+                classesData = firestoreClasses;
+
+                // Update total classes count in admin panel
+                if (isAdmin) {
+                    document.getElementById('totalClasses').textContent = classesData.length;
+                }
+            } catch (error) {
+                console.error('Error loading classes:', error);
+            }
+        }
+
+        // Update zoom class select dropdown
+        function updateZoomClassSelect() {
+            zoomClassSelect.innerHTML = '<option value="">Select a class</option>';
+            classesData.forEach(classData => {
+                const option = document.createElement('option');
+                option.value = classData.id;
+                option.textContent = classData.name;
+                zoomClassSelect.appendChild(option);
+            });
+        }
+
+        // Profile name editing
+        profileName.addEventListener('input', () => {
+            saveProfileBtn.style.display = 'block';
+        });
+
+        saveProfileBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+
+            const newName = profileName.value.trim();
+            if (!newName) {
+                alert('Please enter a valid name');
+                return;
+            }
+
+            saveProfileBtn.textContent = 'Saving...';
+            saveProfileBtn.disabled = true;
+
+            const success = await updateUserName(auth.currentUser.uid, newName);
+
+            if (success) {
+                saveProfileBtn.style.display = 'none';
+                document.getElementById('dashboardUserName').textContent = newName;
+
+                // Update avatars
+                const dashboardAvatar = document.getElementById('dashboardUserAvatar');
+                if (!dashboardAvatar.style.backgroundImage || dashboardAvatar.style.backgroundImage === 'none') {
+                    dashboardAvatar.textContent = newName.charAt(0).toUpperCase();
+                }
+                if (!profileAvatar.style.backgroundImage || profileAvatar.style.backgroundImage === 'none') {
+                    profileAvatar.textContent = newName.charAt(0).toUpperCase();
+                }
+
+                alert('Profile updated successfully!');
+            } else {
+                alert('Failed to update profile. Please try again.');
+            }
+
+            saveProfileBtn.textContent = 'Save Changes';
+            saveProfileBtn.disabled = false;
+        });
+
+        // Admin form handlers
+        addClassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!isAdmin) {
+                alert('Admin access required');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const classData = {
+                name: formData.get('className'),
+                description: formData.get('classDescription'),
+                duration: formData.get('classDuration'),
+                level: formData.get('classLevel'),
+                price: parseInt(formData.get('classPrice')),
+                image: formData.get('classImage'),
+                zoomLink: formData.get('classZoomLink')
+            };
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Adding Class...';
+            submitBtn.disabled = true;
+
+            const success = await addClass(classData);
+
+            if (success) {
+                alert('Class added successfully!');
+                e.target.reset();
+                updateZoomClassSelect();
+                loadUserDashboard();
+            } else {
+                alert('Failed to add class. Please check your permissions and try again.');
+            }
+
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+
+        updateZoomForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!isAdmin) {
+                alert('Admin access required');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const classId = formData.get('classId');
+            const newZoomLink = formData.get('newZoomLink');
+
+            if (!classId || !newZoomLink) {
+                alert('Please select a class and enter a zoom link');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Updating...';
+            submitBtn.disabled = true;
+
+            const success = await updateZoomLink(classId, newZoomLink);
+
+            if (success) {
+                alert('Zoom link updated successfully!');
+                e.target.reset();
+                loadUserDashboard();
+            } else {
+                alert('Failed to update zoom link. Please check your permissions and try again.');
+            }
+
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+
+        // Show subscription modal
+        function showSubscriptionModal(classId) {
+            // Check if user is logged in first
+            if (!auth.currentUser) {
+                alert('Please login first to subscribe to classes.');
+                showLoginModal();
+                return;
+            }
+
+            const classData = classesData.find(c => c.id === classId);
+            if (!classData) return;
+
+            currentPaymentClass = classId;
+            document.getElementById('selectedClassName').textContent = `Choose a plan for ${classData.name}`;
+            subscriptionModal.style.display = 'flex';
+
+            // Reset selection
+            selectedSubscriptionPlan = null;
+            document.querySelectorAll('.subscription-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('continueSubscriptionBtn').disabled = true;
+
+            analytics.logEvent('subscription_modal_opened', {
+                class_id: classId,
+                class_name: classData.name
+            });
+        }
+
+        // Show payment modal with subscription details
+        function showPaymentModal(planType, planData) {
+            selectedSubscriptionPlan = planType;
+
+            document.getElementById('paymentPlanDetails').innerHTML = `
+                <h3>${planData.name}</h3>
+                <p>${planData.description}</p>
+            `;
+            document.getElementById('paymentAmount').textContent = `₹${planData.price}`;
+            confirmPaymentBtn.textContent = `Pay ₹${planData.price} with Cashfree`;
+
+            paymentModal.style.display = 'flex';
+
+            paymentLoading.style.display = 'none';
+            paymentError.style.display = 'none';
+            paymentSuccess.style.display = 'none';
+            confirmPaymentBtn.disabled = false;
+
+            analytics.logEvent('payment_modal_opened', {
+                plan_type: planType,
+                amount: planData.price
+            });
+        }
+
+        // Get subscription plan data
+        function getSubscriptionPlanData(planType) {
+            const plans = {
+                'group-yearly': {
+                    name: 'Group Classes - Yearly Plan',
+                    description: 'Unlimited group class access for 12 months',
+                    price: subscriptionPlans.groupYearly,
+                    duration: 365
+                },
+                'group-monthly': {
+                    name: 'Group Classes - Monthly Plan',
+                    description: 'Unlimited group class access for 1 month',
+                    price: subscriptionPlans.groupMonthly,
+                    duration: 30
+                },
+                'personal-monthly': {
+                    name: 'Personal Sessions - Monthly Package',
+                    description: '16 personal sessions (monthly package)',
+                    price: subscriptionPlans.personalMonthly,
+                    duration: 30
+                },
+                'personal-session': {
+                    name: 'Personal Sessions - Per Session',
+                    description: 'Single personal session',
+                    price: subscriptionPlans.personalSession,
+                    duration: 1
+                },
+                'demo': { // Specific data for demo class payment
+                    name: 'Demo Class Booking',
+                    description: 'One-time demo class booking',
+                    price: subscriptionPlans.demo,
+                    duration: 1 // Not applicable for duration, but needed for structure
+                }
+            };
+            return plans[planType] || null;
+        }
+
+        // Create Cashfree Order
+        async function createCashfreeOrder(userId, planData) {
+            let customerDetails = {};
+            
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                customerDetails = userDoc.exists ? userDoc.data() : {};
+            } catch (error) {
+                console.warn('Could not fetch user details:', error);
+                customerDetails = {};
+            }
+
+            const orderRequest = {
+                userId: userId,
+                customerName: customerDetails.name || currentUser.displayName || 'Customer',
+                customerEmail: currentUser.email,
+                customerPhone: customerDetails.phone || '+919999999999',
+                orderAmount: planData.price,
+                orderCurrency: 'INR',
+                orderDescription: `Supravi Yoga - ${planData.name}`,
+                classId: currentPaymentClass,
+                planType: selectedSubscriptionPlan || 'demo'
+            };
+
+            try {
+                console.log('Creating order with:', orderRequest);
+                
+                const response = await fetch(`${API_BASE_URL}/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                    mode: 'cors',
+                    credentials: 'omit',
+                    body: JSON.stringify(orderRequest),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error Response:', errorText);
+                    throw new Error(`Payment service error. Please try again.`);
+                }
+
+                const orderData = await response.json();
+                
+                if (!orderData.success) {
+                    throw new Error(orderData.message || 'Failed to create payment order');
+                }
+
+                console.log('Cashfree order created successfully:', orderData);
+                return orderData;
+
+            } catch (error) {
+                console.error('Error creating Cashfree order:', error);
+                if (error.message.includes('CORS') || error.message.includes('fetch')) {
+                    throw new Error('Payment service temporarily unavailable. Please contact us at +91 7997142404 to complete your booking.');
+                }
+                throw new Error('Network error: Please check your internet connection and try again.');
+            }
+        }
+
+        // Verify Cashfree Payment
+        async function verifyPayment(orderId) {
+            try {
+                console.log('Verifying payment for order:', orderId);
+                
+                const response = await fetch(`${API_BASE_URL}/verify-payment?orderId=${orderId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+
+                console.log('Verification response status:', response.status);
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        const textError = await response.text();
+                        errorMessage = textError || errorMessage;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const verificationResult = await response.json();
+                console.log('Payment verification result:', verificationResult);
+                return verificationResult;
+
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error('Network error: Unable to verify payment. Please contact us at +91 7997142404 for assistance.');
+                } else if (error.message.includes('CORS')) {
+                    throw new Error('Payment verification temporarily unavailable. Please contact us at +91 7997142404 to confirm your payment.');
+                } else {
+                    throw new Error(error.message || 'Failed to verify payment. Please try again.');
+                }
+            }
+        }
+
+        // Create user subscription and update payment history
+        async function createUserSubscription(userId, planType, planData) {
+            try {
+                const subscription = {
+                    userId: userId,
+                    planType: planType,
+                    planName: planData.name,
+                    amount: planData.price,
+                    duration: planData.duration,
+                    startDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    // Calculate endDate based on duration, defaulting to now if duration is not applicable/set
+                    endDate: planData.duration ? new Date(Date.now() + (planData.duration * 24 * 60 * 60 * 1000)) : firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active',
+                    classId: currentPaymentClass,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('user_subscriptions').add(subscription);
+
+                // Add payment record using orderId from Cashfree if available
+                await db.collection('payments').add({
+                    userId: userId,
+                    orderId: window.currentOrderId, // Link to Cashfree order
+                    amount: planData.price,
+                    planType: planType,
+                    planName: planData.name,
+                    classId: currentPaymentClass,
+                    paymentMethod: 'Cashfree', // Updated payment method
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update user's unlocked classes
+                // Only unlock if it's not a demo class payment that's pending admin approval
+                if (planType !== 'demo') {
+                    await db.collection('users').doc(userId).update({
+                        unlockedClasses: firebase.firestore.FieldValue.arrayUnion(currentPaymentClass)
+                    });
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error creating subscription:', error);
+                return false;
+            }
+        }
+
+        // Update subscription plan fees (admin only)
+        async function updateSubscriptionFees(fees) {
+            try {
+                if (!isAdmin) {
+                    throw new Error('Admin access required');
+                }
+
+                await db.collection('subscription_plans').doc('default').update(fees);
+                subscriptionPlans = { ...subscriptionPlans, ...fees };
+
+                // Update UI prices
+                updateSubscriptionPricesInUI();
+
+                return true;
+            } catch (error) {
+                console.error('Error updating fees:', error);
+                return false;
+            }
+        }
+
+        // Update subscription prices in UI
+        function updateSubscriptionPricesInUI() {
+            // Update group yearly with original and discounted price
+            const groupYearlyElement = document.querySelector('[data-plan="group-yearly"] .subscription-price');
+            if (groupYearlyElement) {
+                groupYearlyElement.innerHTML = `
+                    <span class="original-price">₹${subscriptionPlans.groupYearlyOriginal || 36000}</span>
+                    <span class="current-price">₹${subscriptionPlans.groupYearly}</span>
+                `;
+            }
+
+            const groupMonthlyElement = document.querySelector('[data-plan="group-monthly"] .subscription-price');
+            if (groupMonthlyElement) {
+                groupMonthlyElement.innerHTML = `
+                    <span class="original-price">₹${subscriptionPlans.groupMonthlyOriginal || 3000}</span>
+                    <span class="current-price">₹${subscriptionPlans.groupMonthly}</span>
+                `;
+            }
+
+            const personalMonthlyElement = document.querySelector('[data-plan="personal-monthly"] .subscription-price');
+            if (personalMonthlyElement) {
+                personalMonthlyElement.innerHTML = `
+                    <span class="original-price">₹${subscriptionPlans.personalMonthlyOriginal || 16000}</span>
+                    <span class="current-price">₹${subscriptionPlans.personalMonthly}</span>
+                `;
+            }
+
+            const personalSessionElement = document.querySelector('[data-plan="personal-session"] .subscription-price');
+            if (personalSessionElement) {
+                personalSessionElement.innerHTML = `
+                    <span class="original-price">₹${subscriptionPlans.personalSessionOriginal || 1000}</span>
+                    <span class="current-price">₹${subscriptionPlans.personalSession}</span>
+                `;
+            }
+
+            // Update demo price
+            const demoPriceElement = document.querySelector('.demo-price');
+            if (demoPriceElement) {
+                demoPriceElement.textContent = `₹${subscriptionPlans.demo}`;
+            }
+        }
+
+        // Toggle Mobile Menu
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Show Login Modal
+        const showLoginModal = () => {
+            signupModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+            navLinks.classList.remove('active');
+            analytics.logEvent('login_attempt_started');
+        };
+
+        // Show Signup Modal
+        const showSignupModal = () => {
+            loginModal.style.display = 'none';
+            signupModal.style.display = 'flex';
+            navLinks.classList.remove('active');
+            otpSection.style.display = 'none';
+            sendOtpBtn.textContent = 'Send OTP';
+            analytics.logEvent('signup_attempt_started');
+        };
+
+        // Close Modal
+        const closeModal = () => {
+            loginModal.style.display = 'none';
+            signupModal.style.display = 'none';
+            subscriptionModal.style.display = 'none';
+            paymentModal.style.display = 'none';
+            document.getElementById('demoTimeModal').style.display = 'none';
+            otpSection.style.display = 'none';
+            sendOtpBtn.textContent = 'Send OTP';
+            generatedOtp = '';
+            pendingSignupData = null;
+            currentPaymentClass = null;
+            selectedSubscriptionPlan = null;
+            window.currentOrderId = null; // Reset current order ID
+        };
+
+        // Subscription modal event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Subscription type tabs
+            document.querySelectorAll('.subscription-type-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetType = tab.getAttribute('data-type');
+
+                    document.querySelectorAll('.subscription-type-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.subscription-plan-content').forEach(c => c.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    document.getElementById(targetType + 'Subscription').classList.add('active');
+
+                    // Reset selection
+                    selectedSubscriptionPlan = null;
+                    document.querySelectorAll('.subscription-option').forEach(opt => opt.classList.remove('selected'));
+                    document.getElementById('continueSubscriptionBtn').disabled = true;
+
+                    analytics.logEvent('subscription_tab_clicked', {
+                        plan_type: targetType
+                    });
+                });
+            });
+
+            // Subscription option selection
+            document.querySelectorAll('.subscription-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.subscription-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+
+                    selectedSubscriptionPlan = option.getAttribute('data-plan');
+                    document.getElementById('continueSubscriptionBtn').disabled = false;
+                });
+            });
+
+            // Continue button
+            document.getElementById('continueSubscriptionBtn').addEventListener('click', () => {
+                if (!selectedSubscriptionPlan) return;
+
+                const planData = getSubscriptionPlanData(selectedSubscriptionPlan);
+                if (planData) {
+                    subscriptionModal.style.display = 'none';
+                    showPaymentModal(selectedSubscriptionPlan, planData);
+                }
+            });
+        });
+
+        // Logout function
+        const logout = () => {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+                // Update online status before redirecting
+                if (currentUser) {
+                    updateOnlineStatus(currentUser.uid, false);
+                }
+                showLandingPage();
+                // Clear potentially sensitive global variables
+                currentUser = null;
+                isAdmin = false;
+                selectedSubscriptionPlan = null;
+                window.currentOrderId = null;
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        };
+
+        // Event Listeners
+        mobileLoginBtn.addEventListener('click', showLoginModal);
+        mobileSignupBtn.addEventListener('click', showSignupModal);
+        mobileLogoutBtn.addEventListener('click', logout);
+        mobileDashboardBtn.addEventListener('click', showDashboard);
+        switchToLogin.addEventListener('click', showLoginModal);
+        switchToSignup.addEventListener('click', showSignupModal);
+
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', closeModal);
+        });
+
+        // Show demo time selection modal
+        function showDemoTimeSelection() {
+            if (!auth.currentUser) {
+                alert('Please login or create an account to book a demo class.');
+                showLoginModal();
+                return;
+            }
+
+            // Check if user already booked demo
+            hasUserBookedDemo(auth.currentUser.uid).then(hasBooked => {
+                if (hasBooked) {
+                    alert('You have already used your demo class. Demo is available only once per user.');
+                    return;
+                }
+
+                document.getElementById('demoTimeModal').style.display = 'flex';
+
+                // Set minimum date to today
+                const today = new Date();
+                document.getElementById('demoDate').min = today.toISOString().split('T')[0];
+            });
+        }
+
+        // Create Demo Booking (integrates with Cashfree order creation)
+        async function createDemoBooking(demoData) {
+            try {
+                // Reuse createCashfreeOrder function by passing demo-specific data
+                const demoPlanData = getSubscriptionPlanData('demo');
+                const orderDetails = await createCashfreeOrder(
+                    demoData.userId,
+                    {
+                        ...demoPlanData,
+                        // Add demo specific details
+                        demoDate: demoData.demoDate,
+                        timeSlot: demoData.timeSlot
+                    }
+                );
+
+                // Update demo booking status in Firestore
+                await db.collection('demo_bookings').add({
+                    userId: demoData.userId,
+                    customerName: demoData.customerName,
+                    customerEmail: demoData.customerEmail,
+                    customerPhone: demoData.customerPhone,
+                    demoDate: demoData.demoDate,
+                    timeSlot: demoData.timeSlot,
+                    orderId: orderDetails.orderId, // Store Cashfree order ID
+                    status: 'pending_payment',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                return orderDetails; // Return Cashfree order details
+
+            } catch (error) {
+                console.error('Error creating demo booking:', error);
+                throw error;
+            }
+        }
+
+        // Load my classes (subscribed)
+        async function loadMyClasses() {
+            if (!auth.currentUser) return;
+
+            const myClassesLoading = document.getElementById('myClassesLoading');
+            const myClassesList = document.getElementById('myClassesList');
+
+            myClassesLoading.style.display = 'block';
+
+            try {
+                const unlockedClasses = await getUserUnlockedClasses(auth.currentUser.uid);
+                myClassesList.innerHTML = '';
+
+                if (unlockedClasses.length === 0) {
+                    myClassesList.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <h3>No Classes Subscribed Yet</h3>
+                            <p>Subscribe to classes from the Available Classes tab to see them here.</p>
+                        </div>
+                    `;
+                } else {
+                    const subscribedClasses = classesData.filter(c => unlockedClasses.includes(c.id));
+
+                    subscribedClasses.forEach(classData => {
+                        const classCard = document.createElement('div');
+                        classCard.className = 'dashboard-class-card';
+                        classCard.innerHTML = `
+                            <img src="${classData.image}" alt="${classData.name}">
+                            <div class="dashboard-card-content">
+                                <span class="class-status status-unlocked">✅ Subscribed</span>
+                                <h3>${classData.name}</h3>
+                                <p>${classData.description}</p>
+                                <div class="class-info">
+                                    <span><i class="far fa-clock"></i> ${classData.duration}</span>
+                                    <span><i class="fas fa-user"></i> ${classData.level}</span>
+                                </div>
+                                <a href="${classData.zoomLink}" target="_blank" class="zoom-link">
+                                    <i class="fas fa-video"></i> Join Zoom Class
+                                </a>
+                            </div>
+                        `;
+                        myClassesList.appendChild(classCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading my classes:', error);
+                myClassesList.innerHTML = '<p>Error loading classes. Please try again.</p>';
+            }
+
+            myClassesLoading.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) closeModal();
+            if (e.target === signupModal) closeModal();
+            if (e.target === subscriptionModal) closeModal();
+            if (e.target === paymentModal) closeModal();
+            if (e.target === document.getElementById('demoTimeModal')) closeModal();
+        });
+
+        // Dashboard tabs
+        dashboardTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+
+                dashboardTabs.forEach(t => t.classList.remove('active'));
+                dashboardContents.forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(targetTab + 'Tab').classList.add('active');
+
+                // Load my classes when My Classes tab is clicked
+                if (targetTab === 'myclasses') {
+                    loadMyClasses();
+                }
+            });
+        });
+
+        // Demo booking confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDemoBooking = document.getElementById('confirmDemoBooking');
+            if (confirmDemoBooking) {
+                confirmDemoBooking.addEventListener('click', async () => {
+                    if (!auth.currentUser) return;
+
+                    const demoDate = document.getElementById('demoDate').value;
+                    const timeSlotRadio = document.querySelector('input[name="timeSlot"]:checked');
+
+                    // Clear previous errors
+                    const demoError = document.getElementById('demoError');
+                    if (demoError) {
+                        demoError.style.display = 'none';
+                        demoError.textContent = '';
+                    }
+
+                    if (!demoDate || !timeSlotRadio) {
+                        if (demoError) {
+                            demoError.textContent = 'Please select both date and time slot';
+                            demoError.style.display = 'block';
+                        }
+                        return;
+                    }
+
+                    const timeSlot = timeSlotRadio.value;
+
+                    confirmDemoBooking.textContent = 'Booking...';
+                    confirmDemoBooking.disabled =true;
+
+                    try {
+                        // Check if user already booked demo
+                        const hasBooked = await hasUserBookedDemo(auth.currentUser.uid);
+                        if (hasBooked) {
+                            throw new Error('You have already used your demo class. Demo is available only once per user.');
+                        }
+
+                        const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+                        const userData = userDoc.data() || {};
+
+                        const demoData = {
+                            userId: auth.currentUser.uid,
+                            customerName: userData.name || auth.currentUser.displayName || 'Customer',
+                            customerEmail: auth.currentUser.email,
+                            customerPhone: userData.phone || '+919999999999',
+                            demoDate: demoDate,
+                            timeSlot: timeSlot
+                        };
+
+                        const bookingResult = await createDemoBooking(demoData);
+
+                        // Store demo order ID
+                        window.currentOrderId = bookingResult.orderId;
+
+                        // Close demo modal
+                        document.getElementById('demoTimeModal').style.display = 'none';
+
+                        // Directly redirect to payment
+                        window.location.href = bookingResult.paymentUrl;
+
+                        analytics.logEvent('demo_booking_initiated', {
+                            user_id: auth.currentUser.uid,
+                            demo_date: demoDate,
+                            time_slot: timeSlot,
+                            order_id: bookingResult.orderId
+                        });
+
+                    } catch (error) {
+                        console.error('Demo booking error:', error);
+                        if (demoError) {
+                            demoError.textContent = error.message || 'Failed to book demo class. Please try again.';
+                            demoError.style.display = 'block';
+                        }
+                        confirmDemoBooking.textContent = 'Proceed to Payment - ₹100';
+                        confirmDemoBooking.disabled = false;
+                    }
+                });
+            }
+        });
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            loginError.style.display = 'none';
+            loginSuccess.style.display = 'none';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    loginSuccess.textContent = 'Login successful!';
+                    loginSuccess.style.display = 'block';
+                    analytics.logEvent('login', {
+                        method: 'email'
+                    });
+                    setTimeout(() => {
+                        closeModal();
+                        showDashboard(); // Auto-show dashboard after login
+                    }, 1000);
+                })
+                .catch((error) => {
+                    loginError.textContent = error.message;
+                    loginError.style.display = 'block';
+                    analytics.logEvent('login_failed', {
+                        error_code: error.code
+                    });
+                });
+        });
+
+        // Send OTP Button Click
+        sendOtpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            signupError.style.display = 'none';
+            signupSuccess.style.display = 'none';
+
+            if (!name || !email || !password || !confirmPassword) {
+                signupError.textContent = 'Please fill in all fields';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                signupError.textContent = 'Passwords do not match';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                signupError.textContent = 'Password should be at least 6 characters';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            pendingSignupData = { name, email, password };
+
+            generatedOtp = generateOtp();
+            sendOtpBtn.textContent = 'Sending OTP...';
+            sendOtpBtn.disabled = true;
+
+            sendOtpEmail(email, name, generatedOtp)
+                .then((response) => {
+                    signupSuccess.textContent = 'OTP sent successfully! Check your email.';
+                    signupSuccess.style.display = 'block';
+                    otpSection.style.display = 'block';
+                    sendOtpBtn.textContent = 'OTP Sent';
+                    analytics.logEvent('otp_sent', {
+                        email: email
+                    });
+                })
+                .catch((error) => {
+                    signupError.textContent = 'Failed to send OTP. Please try again.';
+                    signupError.style.display = 'block';
+                    sendOtpBtn.textContent = 'Send OTP';
+                    sendOtpBtn.disabled = false;
+                    console.error('EmailJS Error:', error);
+                });
+        });
+
+        // Verify OTP and Sign Up
+        verifyOtpBtn.addEventListener('click', () => {
+            const enteredOtp = otpInput.value.trim();
+
+            signupError.style.display = 'none';
+            signupSuccess.style.display = 'none';
+
+            if (!enteredOtp) {
+                signupError.textContent = 'Please enter the OTP';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            if (enteredOtp !== generatedOtp) {
+                signupError.textContent = 'Invalid OTP. Please try again.';
+                signupError.style.display = 'block';
+                return;
+            }
+
+            // OTP verified, proceed with signup
+            verifyOtpBtn.textContent = 'Creating Account...';
+            verifyOtpBtn.disabled = true;
+
+            auth.createUserWithEmailAndPassword(pendingSignupData.email, pendingSignupData.password)
+                .then(async (userCredential) => {
+                    // Update user profile
+                    await userCredential.user.updateProfile({
+                        displayName: pendingSignupData.name
+                    });
+
+                    signupSuccess.textContent = 'Account created successfully!';
+                    signupSuccess.style.display = 'block';
+
+                    analytics.logEvent('sign_up', {
+                        method: 'email'
+                    });
+
+                    setTimeout(() => {
+                        closeModal();
+                        showDashboard(); // Auto-show dashboard after signup
+                    }, 1500);
+                })
+                .catch((error) => {
+                    signupError.textContent = error.message;
+                    signupError.style.display = 'block';
+                    verifyOtpBtn.textContent = 'Verify OTP & Sign Up';
+                    verifyOtpBtn.disabled = false;
+
+                    analytics.logEvent('sign_up_failed', {
+                        error_code: error.code
+                    });
+                });
+        });
+
+        // Resend OTP
+        resendOtp.addEventListener('click', () => {
+            if (pendingSignupData) {
+                generatedOtp = generateOtp();
+                sendOtpEmail(pendingSignupData.email, pendingSignupData.name, generatedOtp)
+                    .then(() => {
+                        signupSuccess.textContent = 'OTP resent successfully!';
+                        signupSuccess.style.display = 'block';
+                        signupError.style.display = 'none';
+                    })
+                    .catch((error) => {
+                        signupError.textContent = 'Failed to resend OTP. Please try again.';
+                        signupError.style.display = 'block';
+                        console.error('EmailJS Error:', error);
+                    });
+            }
+        });
+
+        // Send admin notification for demo booking
+        async function sendDemoNotificationToAdmin(bookingDetails) {
+            try {
+                await db.collection('admin_notifications').add({
+                    type: 'demo_booking',
+                    title: 'New Demo Class Booking',
+                    message: `New demo class booking by ${bookingDetails.userName} (${bookingDetails.userEmail}) for ${bookingDetails.date} at ${bookingDetails.timeSlot}`,
+                    bookingId: bookingDetails.bookingId,
+                    userId: bookingDetails.userId,
+                    isRead: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                console.log('Admin notification sent for demo booking');
+            } catch (error) {
+                console.error('Error sending admin notification:', error);
+            }
+        }
+
+        // Payment confirmation handler - Direct payment initiation
+        confirmPaymentBtn.addEventListener('click', async () => {
+            if (!currentUser || !selectedSubscriptionPlan) return;
+
+            confirmPaymentBtn.disabled = true;
+            confirmPaymentBtn.textContent = 'Processing...';
+            paymentLoading.style.display = 'block';
+            paymentError.style.display = 'none';
+            paymentSuccess.style.display = 'none';
+
+            try {
+                const planData = getSubscriptionPlanData(selectedSubscriptionPlan);
+
+                // Create Cashfree order
+                const orderData = await createCashfreeOrder(auth.currentUser.uid, planData);
+
+                // Store order ID for verification
+                window.currentOrderId = orderData.orderId;
+
+                // Directly redirect to payment page
+                window.location.href = orderData.paymentUrl;
+
+                analytics.logEvent('payment_initiated', {
+                    plan_type: selectedSubscriptionPlan,
+                    amount: planData.price,
+                    order_id: orderData.orderId
+                });
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                paymentLoading.style.display = 'none';
+                paymentError.style.display = 'block';
+                paymentError.textContent = error.message || 'Failed to initiate payment. Please try again.';
+                confirmPaymentBtn.disabled = false;
+                confirmPaymentBtn.textContent = 'Pay Now';
+            }
+        });
+
+        
+
+        // Admin fee management
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateFeesBtn = document.getElementById('updateFeesBtn');
+            if (updateFeesBtn) {
+                updateFeesBtn.addEventListener('click', async () => {
+                    if (!isAdmin) {
+                        alert('Admin access required');
+                        return;
+                    }
+
+                    const fees = {
+                        demo: parseInt(document.getElementById('demoFee').value),
+                        groupMonthly: parseInt(document.getElementById('groupMonthlyFee').value),
+                        groupMonthlyOriginal: parseInt(document.getElementById('groupMonthlyOriginalFee').value),
+                        groupYearly: parseInt(document.getElementById('groupYearlyFee').value),
+                        groupYearlyOriginal: parseInt(document.getElementById('groupYearlyOriginalFee').value),
+                        personalMonthly: parseInt(document.getElementById('personalMonthlyFee').value),
+                        personalMonthlyOriginal: parseInt(document.getElementById('personalMonthlyOriginalFee').value),
+                        personalSession: parseInt(document.getElementById('personalSessionFee').value),
+                        personalSessionOriginal: parseInt(document.getElementById('personalSessionOriginalFee').value)
+                    };
+
+                    updateFeesBtn.textContent = 'Updating...';
+                    updateFeesBtn.disabled = true;
+
+                    const success = await updateSubscriptionFees(fees);
+
+                    if (success) {
+                        alert('Fees updated successfully!');
+                    } else {
+                        alert('Failed to update fees. Please try again.');
+                    }
+
+                    updateFeesBtn.textContent = 'Update Fees';
+                    updateFeesBtn.disabled = false;
+                });
+            }
+        });
+
+        // Join class buttons on landing page
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('join-class-btn')) {
+                if (auth.currentUser) {
+                    showDashboard();
+                } else {
+                    showLoginModal();
+                }
+            }
+        });
+
+        // Firebase Auth State Observer
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                isAdmin = checkAdminStatus(user.email);
+
+                updateAuthUI(true);
+                await initializeUserData(user);
+                await updateOnlineStatus(user.uid, true);
+
+                // Load subscription plans
+                await initializeSubscriptionPlans();
+                updateSubscriptionPricesInUI();
+
+                // Update admin fee inputs if admin
+                if (isAdmin) {
+                    document.getElementById('demoFee').value = subscriptionPlans.demo;
+                    document.getElementById('groupMonthlyFee').value = subscriptionPlans.groupMonthly;
+                    document.getElementById('groupMonthlyOriginalFee').value = subscriptionPlans.groupMonthlyOriginal || 3000;
+                    document.getElementById('groupYearlyFee').value = subscriptionPlans.groupYearly;
+                    document.getElementById('groupYearlyOriginalFee').value = subscriptionPlans.groupYearlyOriginal || 36000;
+                    document.getElementById('personalMonthlyFee').value = subscriptionPlans.personalMonthly;
+                    document.getElementById('personalMonthlyOriginalFee').value = subscriptionPlans.personalMonthlyOriginal || 16000;
+                    document.getElementById('personalSessionFee').value = subscriptionPlans.personalSession;
+                    document.getElementById('personalSessionOriginalFee').value = subscriptionPlans.personalSessionOriginal || 1000;
+                }
+
+                // Show welcome note
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                const displayName = userData.name || user.displayName || user.email.split('@')[0];
+                showWelcomeNote('', displayName);
+
+                // Start admin stats interval if admin
+                if (isAdmin && !onlineUsersInterval) {
+                    onlineUsersInterval = setInterval(updateAdminStats, 30000); // Update every 30 seconds
+                }
+
+            } else {
+                currentUser = null;
+                isAdmin = false;
+
+                updateAuthUI(false);
+
+                if (onlineUsersInterval) {
+                    clearInterval(onlineUsersInterval);
+                    onlineUsersInterval = null;
+                }
+
+                // Show landing page if on dashboard
+                if (userDashboard.classList.contains('active')) {
+                    showLandingPage();
+                }
+            }
+        });
+
+        // Initialize app
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                updateOnlineStatus(currentUser.uid, false);
+            }
+        });
+
+        // Initialize classes and subscription plans on page load
+        // Using DOMContentLoaded to ensure elements are available
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeClasses();
+            await initializeSubscriptionPlans();
+            updateSubscriptionPricesInUI(); // Update UI with loaded prices
+        });
+
+        // Subscription plan tabs functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const subscriptionTabs = document.querySelectorAll('.subscription-tab');
+            const subscriptionContents = document.querySelectorAll('.subscription-content');
+
+            subscriptionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetPlan = tab.getAttribute('data-plan');
+
+                    // Remove active class from all tabs and contents
+                    subscriptionTabs.forEach(t => t.classList.remove('active'));
+                    subscriptionContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(targetPlan + 'Plan').classList.add('active');
+
+                    // Analytics tracking
+                    analytics.logEvent('subscription_tab_clicked', {
+                        plan_type: targetPlan
+                    });
+                });
+            });
+
+            // Subscribe button functionality
+            document.querySelectorAll('.btn-subscribe, .btn-demo').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const planType = btn.getAttribute('data-plan') || 'demo';
+
+                    // Track analytics
+                    analytics.logEvent('subscription_interest', {
+                        plan_type: planType,
+                        button_text: btn.textContent
+                    });
+
+                    // Check if user is logged in
+                    if (auth.currentUser) {
+                        // For actual subscription/demo booking, this button should trigger the respective modal
+                        if (btn.classList.contains('btn-demo')) {
+                            showDemoTimeSelection();
+                        } else {
+                            // Logic to show subscription modal for other plans
+                            // This part might need refinement based on how specific class IDs are passed
+                            // For now, assuming it might open the general subscription modal
+                            console.log('Showing subscription modal for plan:', planType);
+                            // showSubscriptionModal('some-class-id'); // Placeholder
+                        }
+                    } else {
+                        // Prompt to login first
+                        alert('Please login or create an account to subscribe to our plans.');
+                        showLoginModal();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
