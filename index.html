@@ -1763,12 +1763,6 @@
             font-weight: 500;
         }
 
-        .current-price {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: #333;
-        }
-
         .subscription-savings {
             color: #28a745;
             font-weight: 600;
@@ -4145,6 +4139,61 @@
             return plans[planIdentifier];
         }
 
+        // Process demo payment automatically
+        async function processDemoPayment(date, timeSlot) {
+            const planData = { name: 'Demo Class', price: subscriptionPlans.demo, description: 'Introductory demo class' };
+            const orderId = `demo_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const returnUrl = `${window.location.origin}/payment-success.html`; // Your success URL
+            const notifyUrl = 'https://us-central1-supravi-yoga.cloudfunctions.net/cashfreeWebhook'; // Your webhook URL
+
+            try {
+                const response = await fetch('https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        orderAmount: planData.price,
+                        customerName: auth.currentUser.displayName || 'Customer',
+                        customerEmail: auth.currentUser.email,
+                        orderNote: 'Supravi Yoga Demo Class Booking',
+                        returnUrl: returnUrl,
+                        notifyUrl: notifyUrl
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store pending payment details with date and time
+                    localStorage.setItem('pendingPayment', JSON.stringify({
+                        orderId: orderId,
+                        plan: { ...planData, type: 'demo' }, // Add type 'demo'
+                        bookingId: `${date}_${timeSlot}`, // Store date and time as bookingId
+                        classId: 'demo-class'
+                    }));
+
+                    // Redirect to payment URL
+                    window.open(result.paymentUrl, '_blank');
+
+                    // Start checking for payment confirmation
+                    checkPaymentStatus(orderId);
+                } else {
+                    alert('Failed to initiate payment. Please try again.');
+                    // Re-enable button if payment initiation fails
+                    document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${planData.price}`;
+                    document.getElementById('confirmDemoBooking').disabled = false;
+                }
+            } catch (error) {
+                console.error('Error initiating demo payment:', error);
+                alert('An error occurred during payment initiation. Please try again.');
+                // Re-enable button on error
+                document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${planData.price}`;
+                document.getElementById('confirmDemoBooking').disabled = false;
+            }
+        }
+
         // Check payment status periodically
         async function checkPaymentStatus(orderId) {
             try {
@@ -4152,26 +4201,55 @@
                 const result = await response.json();
 
                 if (result.success && result.paymentStatus === 'PAID') {
-                    // Payment successful, create subscription and unlock class
-                    const planData = getSubscriptionPlanData(selectedSubscriptionPlan);
-                    const unlockSuccess = await createUserSubscription(currentUser.uid, selectedSubscriptionPlan, planData);
+                    // Payment successful, confirm booking and unlock class
+                    const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment'));
+                    if (pendingPayment && pendingPayment.orderId === orderId) {
+                        await db.collection('demo_bookings').add({
+                            userId: auth.currentUser.uid,
+                            userEmail: auth.currentUser.email,
+                            userName: auth.currentUser.displayName || 'Customer',
+                            bookingId: pendingPayment.bookingId,
+                            amount: pendingPayment.plan.price,
+                            status: 'confirmed',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            paymentConfirmed: true,
+                            paymentDate: firebase.firestore.FieldValue.serverTimestamp()
+                        });
 
-                    if (unlockSuccess) {
-                        alert('Payment confirmed and class unlocked!');
+                        // Send notification to admin
+                        await sendDemoNotificationToAdmin({
+                            userName: auth.currentUser.displayName || auth.currentUser.email,
+                            userEmail: auth.currentUser.email,
+                            date: pendingPayment.bookingId.split('_')[0], // Extract date
+                            timeSlot: pendingPayment.bookingId.split('_')[1], // Extract time slot
+                            bookingId: orderId,
+                            userId: auth.currentUser.uid
+                        });
+
+                        alert('Payment confirmed! Your demo class is booked.');
+                        localStorage.removeItem('pendingPayment');
                         loadUserDashboard();
                     } else {
-                        alert('Payment confirmed, but failed to unlock class. Please contact support.');
+                        alert('Payment confirmed, but pending payment details are inconsistent. Please contact support.');
                     }
                 } else if (result.success && result.paymentStatus === 'PENDING') {
                     // Payment pending, check again later
                     setTimeout(() => checkPaymentStatus(orderId), 5000); // Check again in 5 seconds
                 } else {
                     // Payment failed or other error
-                    alert('Payment failed or could not be verified. Please check your payment status.');
+                    alert('Payment failed or could not be verified. Please check your payment status or contact support.');
+                    localStorage.removeItem('pendingPayment'); // Clear pending payment
+                    // Re-enable demo booking button if needed
+                    document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${subscriptionPlans.demo}`;
+                    document.getElementById('confirmDemoBooking').disabled = false;
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
-                alert('Error checking payment status. Please try again.');
+                alert('Error checking payment status. Please contact support.');
+                localStorage.removeItem('pendingPayment'); // Clear pending payment on error
+                // Re-enable demo booking button on error
+                document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${subscriptionPlans.demo}`;
+                document.getElementById('confirmDemoBooking').disabled = false;
             }
         }
 
@@ -4216,7 +4294,7 @@
                     // Store orderId and plan details for payment confirmation
                     localStorage.setItem('pendingPayment', JSON.stringify({
                         orderId: orderId,
-                        plan: selectedSubscriptionPlan,
+                        plan: { ...planData, type: selectedSubscriptionPlan.split('-')[0] }, // Determine type from selectedSubscriptionPlan
                         classId: currentPaymentClass
                     }));
 
@@ -4640,33 +4718,29 @@
             });
         });
 
-        // Demo booking confirmation
-        document.getElementById('confirmDemoBooking').addEventListener('click', () => {
+        // Demo Time Selection Modal
+        document.getElementById('confirmDemoBooking').addEventListener('click', async () => {
             const demoDate = document.getElementById('demoDate').value;
-            const selectedTimeSlotRadio = document.querySelector('input[name="timeSlot"]:checked');
+            const selectedTimeSlot = document.querySelector('input[name="timeSlot"]:checked');
 
-            // Clear previous errors
-            const demoError = document.getElementById('demoError');
-            if (demoError) {
-                demoError.style.display = 'none';
-                demoError.textContent = '';
-            }
-
-            if (!demoDate || !selectedTimeSlotRadio) {
-                if (demoError) {
-                    demoError.textContent = 'Please select both date and time slot';
-                    demoError.style.display = 'block';
-                }
+            if (!demoDate || !selectedTimeSlot) {
+                document.getElementById('demoError').textContent = 'Please select both date and time slot';
+                document.getElementById('demoError').style.display = 'block';
                 return;
             }
 
-            const timeSlot = selectedTimeSlotRadio.value;
+            const timeSlot = selectedTimeSlot.value;
 
-            // Book the demo class and redirect to Cashfree
-            bookDemoClass(demoDate, timeSlot);
+            // Disable button and show loading
+            const confirmBtn = document.getElementById('confirmDemoBooking');
+            confirmBtn.textContent = 'Processing Payment...';
+            confirmBtn.disabled = true;
 
-            // Close the time selection modal immediately
-            closeModal();
+            // Hide demo modal
+            document.getElementById('demoTimeModal').style.display = 'none';
+
+            // Process payment automatically
+            await processDemoPayment(demoDate, timeSlot);
         });
 
         // Login Form Submission
@@ -4845,87 +4919,43 @@
             }
         }
 
-        // Payment confirmation
-        confirmPaymentBtn.addEventListener('click', async () => {
-            const paymentData = JSON.parse(localStorage.getItem('pendingPayment'));
-            if (!paymentData) {
-                alert('No pending payment found.');
-                return;
-            }
+        // Check for payment success on page load
+        function checkPaymentSuccess() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentSuccessParam = urlParams.get('payment_success');
+            const orderId = urlParams.get('orderId'); // Cashfree returns orderId as query param
 
-            const { orderId, plan, bookingId, classId } = paymentData;
+            if (paymentSuccessParam === 'true' && orderId) {
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
 
-            if (!currentUser || !plan) return;
+                // Show success message
+                alert('Payment successful! Your subscription has been activated automatically.');
 
-            paymentLoading.style.display = 'block';
-            confirmPaymentBtn.disabled = true;
-
-            try {
-                if (plan.type === 'demo') {
-                    // Confirm demo class booking
-                    await db.collection('demo_bookings').doc(bookingId).update({
-                        status: 'confirmed',
-                        paymentConfirmed: true,
-                        paymentDate: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    // Send notification to admin
-                    await sendDemoNotificationToAdmin({
-                        userName: currentUser.displayName || currentUser.email,
-                        userEmail: currentUser.email,
-                        date: document.getElementById('demoDate').value, // Get date from input
-                        timeSlot: document.querySelector('input[name="timeSlot"]:checked')?.value || 'N/A', // Get time slot
-                        bookingId: bookingId,
-                        userId: currentUser.uid
-                    });
-
-                    paymentSuccess.textContent = 'Demo class booked successfully! Please check your email for details.';
-                    paymentSuccess.style.display = 'block';
-
-                    analytics.logEvent('demo_payment_completed', {
-                        date: document.getElementById('demoDate').value,
-                        time_slot: document.querySelector('input[name="timeSlot"]:checked')?.value || 'N/A',
-                        order_id: orderId
-                    });
-                    localStorage.removeItem('pendingPayment'); // Clear pending payment data
-                } else {
-                    // Handle regular subscription payment confirmation
-                    const success = await createUserSubscription(currentUser.uid, plan, { classId: classId, orderId: orderId });
-
-                    if (success) {
-                        paymentSuccess.textContent = 'Subscription activated successfully! You can now access your classes.';
-                        paymentSuccess.style.display = 'block';
-
-                        analytics.logEvent('subscription_purchased', {
-                            plan_type: plan.type,
-                            amount: plan.price,
-                            order_id: orderId
-                        });
-                        localStorage.removeItem('pendingPayment'); // Clear pending payment data
-                    } else {
-                        paymentError.textContent = 'Failed to activate subscription. Please try again.';
-                        paymentError.style.display = 'block';
-                        return;
-                    }
+                // If user is logged in, refresh their dashboard
+                if (auth.currentUser) {
+                    loadUserDashboard();
                 }
+            } else if (paymentSuccessParam === 'false') {
+                alert('Payment failed. Please try again.');
+            }
+        }
 
-                setTimeout(() => {
-                    closeModal();
-                    loadUserDashboard(); // Refresh dashboard
-                }, 2000);
+        // Initialize app on page load
+        async function initializeApp() {
+            await initializeSubscriptionPlans();
+            await initializeClasses();
 
-            } catch (error) {
-                paymentError.textContent = 'An error occurred. Please try again.';
-                paymentError.style.display = 'block';
-                console.error('Payment confirmation error:', error);
+            // Check for payment success from Cashfree redirect
+            checkPaymentSuccess();
+
+            // Set minimum date for demo booking to today
+            const today = new Date().toISOString().split('T')[0];
+            if (document.getElementById('demoDate')) {
+                document.getElementById('demoDate').min = today;
             }
 
-            paymentLoading.style.display = 'none';
-            confirmPaymentBtn.disabled = false;
-        });
-
-        // Admin fee management
-        document.addEventListener('DOMContentLoaded', function() {
+            // Admin fee update handler
             const updateFeesBtn = document.getElementById('updateFeesBtn');
             if (updateFeesBtn) {
                 updateFeesBtn.addEventListener('click', async () => {
@@ -4961,20 +4991,13 @@
                     updateFeesBtn.disabled = false;
                 });
             }
-        });
 
-        // Join class buttons on landing page
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('join-class-btn')) {
-                if (auth.currentUser) {
-                    showDashboard();
-                } else {
-                    showLoginModal();
-                }
-            }
-        });
+            // Update admin stats every 30 seconds
+            if (onlineUsersInterval) clearInterval(onlineUsersInterval);
+            onlineUsersInterval = setInterval(updateAdminStats, 30000);
+        }
 
-        // Firebase Auth State Observer
+        // Check authentication state and initialize app
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
@@ -4991,14 +5014,14 @@
 
                 // Update admin fee inputs if admin
                 if (isAdmin) {
-                    document.getElementById('demoFee').value = subscriptionPlans.demo;
-                    document.getElementById('groupMonthlyFee').value = subscriptionPlans.groupMonthly;
+                    document.getElementById('demoFee').value = subscriptionPlans.demo || 100;
+                    document.getElementById('groupMonthlyFee').value = subscriptionPlans.groupMonthly || 1800;
                     document.getElementById('groupMonthlyOriginalFee').value = subscriptionPlans.groupMonthlyOriginal || 3000;
-                    document.getElementById('groupYearlyFee').value = subscriptionPlans.groupYearly;
+                    document.getElementById('groupYearlyFee').value = subscriptionPlans.groupYearly || 15120;
                     document.getElementById('groupYearlyOriginalFee').value = subscriptionPlans.groupYearlyOriginal || 36000;
-                    document.getElementById('personalMonthlyFee').value = subscriptionPlans.personalMonthly;
+                    document.getElementById('personalMonthlyFee').value = subscriptionPlans.personalMonthly || 12800;
                     document.getElementById('personalMonthlyOriginalFee').value = subscriptionPlans.personalMonthlyOriginal || 16000;
-                    document.getElementById('personalSessionFee').value = subscriptionPlans.personalSession;
+                    document.getElementById('personalSessionFee').value = subscriptionPlans.personalSession || 800;
                     document.getElementById('personalSessionOriginalFee').value = subscriptionPlans.personalSessionOriginal || 1000;
                 }
 
@@ -5029,87 +5052,8 @@
                     showLandingPage();
                 }
             }
-        });
-
-        // Initialize app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializeSubscriptionPlans();
-            await initializeClasses();
-
-            // Initialize subscription tabs
-            const subscriptionTabs = document.querySelectorAll('.subscription-tab');
-            const subscriptionContents = document.querySelectorAll('.subscription-content');
-
-            subscriptionTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const target = tab.getAttribute('data-target');
-
-                    subscriptionTabs.forEach(t => t.classList.remove('active'));
-                    subscriptionContents.forEach(c => c.classList.remove('active'));
-
-                    tab.classList.add('active');
-                    if (target && document.getElementById(target)) {
-                        document.getElementById(target).classList.add('active');
-                    }
-                });
-            });
-
-            // Set up authentication state listener
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    currentUser = user;
-                    isAdmin = checkAdminStatus(user.email);
-
-                    updateAuthUI(true);
-                    await initializeUserData(user);
-                    await updateOnlineStatus(user.uid, true);
-
-                    // Load subscription plans
-                    await initializeSubscriptionPlans();
-                    updateSubscriptionPricesInUI();
-                    updateDemoPriceInUI(); // Ensure demo price is updated
-
-                    // Update admin fee inputs if admin
-                    if (isAdmin) {
-                        document.getElementById('demoFee').value = subscriptionPlans.demo;
-                        document.getElementById('groupMonthlyFee').value = subscriptionPlans.groupMonthly;
-                        document.getElementById('groupMonthlyOriginalFee').value = subscriptionPlans.groupMonthlyOriginal || 3000;
-                        document.getElementById('groupYearlyFee').value = subscriptionPlans.groupYearly;
-                        document.getElementById('groupYearlyOriginalFee').value = subscriptionPlans.groupYearlyOriginal || 36000;
-                        document.getElementById('personalMonthlyFee').value = subscriptionPlans.personalMonthly;
-                        document.getElementById('personalMonthlyOriginalFee').value = subscriptionPlans.personalMonthlyOriginal || 16000;
-                        document.getElementById('personalSessionFee').value = subscriptionPlans.personalSession;
-                        document.getElementById('personalSessionOriginalFee').value = subscriptionPlans.personalSessionOriginal || 1000;
-                    }
-
-                    // Show welcome note
-                    const userDoc = await db.collection('users').doc(user.uid).get();
-                    const userData = userDoc.exists ? userDoc.data() : {};
-                    const displayName = userData.name || user.displayName || user.email.split('@')[0];
-                    showWelcomeNote('', displayName);
-
-                    // Start admin stats interval if admin
-                    if (isAdmin && !onlineUsersInterval) {
-                        onlineUsersInterval = setInterval(updateAdminStats, 30000); // Update every 30 seconds
-                    }
-
-                } else {
-                    currentUser = null;
-                    isAdmin = false;
-
-                    updateAuthUI(false);
-
-                    if (onlineUsersInterval) {
-                        clearInterval(onlineUsersInterval);
-                        onlineUsersInterval = null;
-                    }
-
-                    // Show landing page if on dashboard
-                    if (userDashboard.classList.contains('active')) {
-                        showLandingPage();
-                    }
-                }
-            });
+            // Once auth state is determined, initialize the rest of the app
+            await initializeApp();
         });
 
         window.addEventListener('beforeunload', () => {
