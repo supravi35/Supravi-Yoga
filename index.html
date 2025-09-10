@@ -3835,8 +3835,7 @@
             // Show admin indicator if user is admin
             if (isAdmin) {
                 document.getElementById('dashboardAdminIndicator').style.display = 'inline-block';
-                adminPanel.style.display = 'block';
-                updateAdminStats();
+                adminPanel.style.display = 'block';                updateAdminStats();
                 updateZoomClassSelect();
             }
 
@@ -4132,11 +4131,126 @@
             });
         }
 
-        // Show payment modal with subscription details
-        function showPaymentModal(planType, planData) {
-            selectedSubscriptionPlan = { type: planType, ...planData };
+        // Helper to get subscription plan data
+        function getSubscriptionPlanData(planIdentifier) {
+            // This function needs to map planIdentifier to actual plan details
+            // For now, we'll use a simplified mapping based on the structure
+            const plans = {
+                'group-monthly': { name: 'Group Monthly', price: subscriptionPlans.groupMonthly, originalPrice: subscriptionPlans.groupMonthlyOriginal, duration: '1 month', description: 'Access to all group classes for a month' },
+                'group-yearly': { name: 'Group Yearly', price: subscriptionPlans.groupYearly, originalPrice: subscriptionPlans.groupYearlyOriginal, duration: '1 year', description: 'Unlimited access to group classes for a year' },
+                'personal-monthly': { name: 'Personal Monthly', price: subscriptionPlans.personalMonthly, originalPrice: subscriptionPlans.personalMonthlyOriginal, duration: '1 month', description: '4 personalized sessions per month' },
+                'personal-session': { name: 'Personal Session', price: subscriptionPlans.personalSession, originalPrice: subscriptionPlans.personalSessionOriginal, duration: '1 session', description: 'A single personalized yoga session' },
+                'demo': { name: 'Demo Class', price: subscriptionPlans.demo, description: 'Introductory demo class' }
+            };
+            return plans[planIdentifier];
+        }
 
-            // Get the appropriate Cashfree payment link
+        // Check payment status periodically
+        async function checkPaymentStatus(orderId) {
+            try {
+                const response = await fetch(`https://us-central1-supravi-yoga.cloudfunctions.net/getCashfreeOrderDetails?orderId=${orderId}`);
+                const result = await response.json();
+
+                if (result.success && result.paymentStatus === 'PAID') {
+                    // Payment successful, create subscription and unlock class
+                    const planData = getSubscriptionPlanData(selectedSubscriptionPlan);
+                    const unlockSuccess = await createUserSubscription(currentUser.uid, selectedSubscriptionPlan, planData);
+
+                    if (unlockSuccess) {
+                        alert('Payment confirmed and class unlocked!');
+                        loadUserDashboard();
+                    } else {
+                        alert('Payment confirmed, but failed to unlock class. Please contact support.');
+                    }
+                } else if (result.success && result.paymentStatus === 'PENDING') {
+                    // Payment pending, check again later
+                    setTimeout(() => checkPaymentStatus(orderId), 5000); // Check again in 5 seconds
+                } else {
+                    // Payment failed or other error
+                    alert('Payment failed or could not be verified. Please check your payment status.');
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+                alert('Error checking payment status. Please try again.');
+            }
+        }
+
+        // Continue button logic (updated)
+        document.getElementById('continueSubscriptionBtn').addEventListener('click', async () => {
+            if (!selectedSubscriptionPlan) return;
+
+            const planData = getSubscriptionPlanData(selectedSubscriptionPlan);
+            if (!planData) {
+                alert('Invalid plan selected. Please try again.');
+                return;
+            }
+
+            const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const returnUrl = `${window.location.origin}/payment-success.html`; // Ensure this path is correct
+            const notifyUrl = 'https://us-central1-supravi-yoga.cloudfunctions.net/cashfreeWebhook';
+
+            try {
+                const response = await fetch('https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        orderAmount: planData.price,
+                        customerName: auth.currentUser.displayName || 'Customer',
+                        customerEmail: auth.currentUser.email,
+                        orderNote: `Supravi Yoga - ${planData.name}`,
+                        returnUrl: returnUrl,
+                        notifyUrl: notifyUrl
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect to payment URL
+                    window.open(result.paymentUrl, '_blank');
+                    subscriptionModal.style.display = 'none';
+
+                    // Store orderId and plan details for payment confirmation
+                    localStorage.setItem('pendingPayment', JSON.stringify({
+                        orderId: orderId,
+                        plan: selectedSubscriptionPlan,
+                        classId: currentPaymentClass
+                    }));
+
+                    // Start checking payment status
+                    checkPaymentStatus(orderId);
+                } else {
+                    alert('Failed to create payment order. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert('Failed to create payment order. Please try again.');
+            }
+        });
+
+        // Update demo class price in UI
+        function updateDemoPriceInUI() {
+            const demoPriceElement = document.querySelector('.demo-price');
+            if (demoPriceElement) {
+                demoPriceElement.textContent = `₹${subscriptionPlans.demo || 100}`;
+            }
+            const demoButton = document.querySelector('.btn-demo');
+            if (demoButton) {
+                demoButton.textContent = `Book Demo Class - ₹${subscriptionPlans.demo || 100}`;
+            }
+            const confirmDemoButton = document.getElementById('confirmDemoBooking');
+            if (confirmDemoButton) {
+                confirmDemoButton.textContent = `Proceed to Payment - ₹${subscriptionPlans.demo || 100}`;
+            }
+        }
+
+        // Show payment modal with subscription details
+        function showPaymentModal(planType, planData, orderId = null, bookingId = null) {
+            selectedSubscriptionPlan = { type: planType, ...planData, orderId: orderId, bookingId: bookingId };
+
             let paymentLink = '';
             switch(planType) {
                 case 'group-monthly':
@@ -4160,7 +4274,7 @@
 
             document.getElementById('paymentPlanDetails').innerHTML = `
                 <h3>${planData.name}</h3>
-                <p>${planData.description}</p>
+                <p>${planData.description || ''}</p>
             `;
             document.getElementById('paymentAmount').textContent = `₹${planData.price}`;
             document.getElementById('cashfreeLink').href = paymentLink;
@@ -4180,18 +4294,19 @@
         }
 
         // Create user subscription
-        async function createUserSubscription(userId, planType, planData) {
+        async function createUserSubscription(userId, planDetails, paymentDetails) {
             try {
                 const subscription = {
                     userId: userId,
-                    planType: planType,
-                    planName: planData.name,
-                    amount: planData.price,
-                    duration: planData.duration,
+                    planType: planDetails.type,
+                    planName: planDetails.name,
+                    amount: planDetails.price,
+                    duration: planDetails.duration,
                     startDate: firebase.firestore.FieldValue.serverTimestamp(),
-                    endDate: new Date(Date.now() + (planData.duration * 24 * 60 * 60 * 1000)),
+                    // Calculate endDate based on duration, default to 1 month if not provided
+                    endDate: planDetails.duration ? new Date(Date.now() + (parseInt(planDetails.duration) * 24 * 60 * 60 * 1000)) : new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)),
                     status: 'active',
-                    classId: currentPaymentClass,
+                    classId: paymentDetails.classId, // Use classId from paymentDetails
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
@@ -4200,10 +4315,11 @@
                 // Add payment record
                 await db.collection('payments').add({
                     userId: userId,
-                    amount: planData.price,
-                    planType: planType,
-                    planName: planData.name,
-                    classId: currentPaymentClass,
+                    amount: planDetails.price,
+                    planType: planDetails.type,
+                    planName: planDetails.name,
+                    classId: paymentDetails.classId,
+                    orderId: paymentDetails.orderId, // Include orderId
                     paymentMethod: 'Cashfree', // Updated payment method
                     status: 'completed',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -4211,7 +4327,7 @@
 
                 // Update user's unlocked classes
                 await db.collection('users').doc(userId).update({
-                    unlockedClasses: firebase.firestore.FieldValue.arrayUnion(currentPaymentClass)
+                    unlockedClasses: firebase.firestore.FieldValue.arrayUnion(paymentDetails.classId)
                 });
 
                 return true;
@@ -4233,6 +4349,7 @@
 
                 // Update UI prices
                 updateSubscriptionPricesInUI();
+                updateDemoPriceInUI(); // Update demo price as well
 
                 return true;
             } catch (error) {
@@ -4274,12 +4391,6 @@
                     <span class="original-price">₹${subscriptionPlans.personalSessionOriginal || 1000}</span>
                     <span class="current-price">₹${subscriptionPlans.personalSession}</span>
                 `;
-            }
-
-            // Update demo price
-            const demoPriceElement = document.querySelector('.demo-price');
-            if (demoPriceElement) {
-                demoPriceElement.textContent = `₹${subscriptionPlans.demo}`;
             }
         }
 
@@ -4355,33 +4466,6 @@
                     document.getElementById('continueSubscriptionBtn').disabled = false;
                 });
             });
-
-            // Continue button
-            document.getElementById('continueSubscriptionBtn').addEventListener('click', () => {
-                if (!selectedSubscriptionPlan) return;
-
-                // Get the appropriate Cashfree payment link and redirect directly
-                let paymentLink = '';
-                switch(selectedSubscriptionPlan) {
-                    case 'group-monthly':
-                        paymentLink = 'https://payments.cashfree.com/links?code=i94u9conmt5g';
-                        break;
-                    case 'group-yearly':
-                        paymentLink = 'https://payments.cashfree.com/links?code=h94u9aja6bpg';
-                        break;
-                    case 'personal-monthly':
-                        paymentLink = 'https://payments.cashfree.com/links?code=u94u9gguqbpg';
-                        break;
-                    case 'personal-session':
-                        paymentLink = 'https://payments.cashfree.com/links?code=h94u9i6c4t5g';
-                        break;
-                }
-
-                if (paymentLink) {
-                    window.open(paymentLink, '_blank');
-                    subscriptionModal.style.display = 'none';
-                }
-            });
         });
 
         // Logout function
@@ -4452,9 +4536,16 @@
 
                 const docRef = await db.collection('demo_bookings').add(demoBooking);
 
-                // Redirect directly to Cashfree payment link for demo class
-                window.open('https://payments.cashfree.com/links?code=i94u9s7l4t5g', '_blank');
-                closeModal(); // Close the time selection modal
+                // Store booking details to confirm after payment
+                localStorage.setItem('pendingPayment', JSON.stringify({
+                    orderId: docRef.id, // Use booking ID as orderId for demo
+                    plan: { type: 'demo', name: 'Demo Class', price: subscriptionPlans.demo, description: 'Introductory demo class' },
+                    bookingId: docRef.id,
+                    classId: 'demo-class'
+                }));
+
+                // Redirect to Cashfree payment for demo class
+                showPaymentModal('demo', { name: 'Demo Class', price: subscriptionPlans.demo || 100, description: 'Introductory demo class' }, docRef.id);
 
                 analytics.logEvent('demo_class_booked', {
                     date: date,
@@ -4756,16 +4847,23 @@
 
         // Payment confirmation
         confirmPaymentBtn.addEventListener('click', async () => {
-            if (!currentUser || !selectedSubscriptionPlan) return;
+            const paymentData = JSON.parse(localStorage.getItem('pendingPayment'));
+            if (!paymentData) {
+                alert('No pending payment found.');
+                return;
+            }
+
+            const { orderId, plan, bookingId, classId } = paymentData;
+
+            if (!currentUser || !plan) return;
 
             paymentLoading.style.display = 'block';
             confirmPaymentBtn.disabled = true;
 
             try {
-                if (selectedSubscriptionPlan.type === 'demo') {
-                    // Handle demo class payment confirmation
-                    // Since demo payment redirects directly to Cashfree, this part confirms the booking
-                    await db.collection('demo_bookings').doc(selectedSubscriptionPlan.bookingId).update({
+                if (plan.type === 'demo') {
+                    // Confirm demo class booking
+                    await db.collection('demo_bookings').doc(bookingId).update({
                         status: 'confirmed',
                         paymentConfirmed: true,
                         paymentDate: firebase.firestore.FieldValue.serverTimestamp()
@@ -4775,9 +4873,9 @@
                     await sendDemoNotificationToAdmin({
                         userName: currentUser.displayName || currentUser.email,
                         userEmail: currentUser.email,
-                        date: selectedSubscriptionPlan.date,
-                        timeSlot: selectedSubscriptionPlan.timeSlot,
-                        bookingId: selectedSubscriptionPlan.bookingId,
+                        date: document.getElementById('demoDate').value, // Get date from input
+                        timeSlot: document.querySelector('input[name="timeSlot"]:checked')?.value || 'N/A', // Get time slot
+                        bookingId: bookingId,
                         userId: currentUser.uid
                     });
 
@@ -4785,22 +4883,25 @@
                     paymentSuccess.style.display = 'block';
 
                     analytics.logEvent('demo_payment_completed', {
-                        date: selectedSubscriptionPlan.date,
-                        time_slot: selectedSubscriptionPlan.timeSlot
+                        date: document.getElementById('demoDate').value,
+                        time_slot: document.querySelector('input[name="timeSlot"]:checked')?.value || 'N/A',
+                        order_id: orderId
                     });
+                    localStorage.removeItem('pendingPayment'); // Clear pending payment data
                 } else {
                     // Handle regular subscription payment confirmation
-                    const planData = getSubscriptionPlanData(selectedSubscriptionPlan.type); // Use type from selectedSubscriptionPlan
-                    const success = await createUserSubscription(currentUser.uid, selectedSubscriptionPlan.type, planData);
+                    const success = await createUserSubscription(currentUser.uid, plan, { classId: classId, orderId: orderId });
 
                     if (success) {
                         paymentSuccess.textContent = 'Subscription activated successfully! You can now access your classes.';
                         paymentSuccess.style.display = 'block';
 
                         analytics.logEvent('subscription_purchased', {
-                            plan_type: selectedSubscriptionPlan.type,
-                            amount: planData.price
+                            plan_type: plan.type,
+                            amount: plan.price,
+                            order_id: orderId
                         });
+                        localStorage.removeItem('pendingPayment'); // Clear pending payment data
                     } else {
                         paymentError.textContent = 'Failed to activate subscription. Please try again.';
                         paymentError.style.display = 'block';
@@ -4886,6 +4987,7 @@
                 // Load subscription plans
                 await initializeSubscriptionPlans();
                 updateSubscriptionPricesInUI();
+                updateDemoPriceInUI(); // Ensure demo price is updated
 
                 // Update admin fee inputs if admin
                 if (isAdmin) {
@@ -4965,6 +5067,7 @@
                     // Load subscription plans
                     await initializeSubscriptionPlans();
                     updateSubscriptionPricesInUI();
+                    updateDemoPriceInUI(); // Ensure demo price is updated
 
                     // Update admin fee inputs if admin
                     if (isAdmin) {
