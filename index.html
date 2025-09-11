@@ -1922,23 +1922,8 @@
             margin-bottom: 10px;
         }
 
-        .razorpay-link {
-            background: #528ff0;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-
-        .razorpay-link:hover {
-            background: #4285f4;
-        }
-
-        #cashfreeLink {
-            background: var(--primary); /* Example styling, adjust as needed */
+        .cashfree-link {
+            background: var(--primary);
             color: white;
             padding: 15px 30px;
             border-radius: 5px;
@@ -1947,11 +1932,11 @@
             margin: 20px 0;
             font-weight: bold;
             transition: all 0.3s ease;
-            cursor: pointer; /* Indicate it's clickable */
+            cursor: pointer;
         }
 
-        #cashfreeLink:hover {
-            background: #3a7262; /* Darker shade of primary */
+        .cashfree-link:hover {
+            background: #3a7262;
             transform: translateY(-2px);
         }
 
@@ -2260,6 +2245,7 @@
             }
         }
     </style>
+  <script src="https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js"></script>
 </head>
 <body>
     <!-- Welcome Note -->
@@ -3085,23 +3071,16 @@
                 <div class="payment-instructions">
                     <h4>Payment Instructions:</h4>
                     <ol>
-                        <li>Click the "Pay Now" button below</li>
-                        <li>Complete the payment</li>
-                        <li>Take a screenshot of the payment confirmation</li>
-                        <li>Come back to this page and click "I have completed payment"</li>
-                        <li>Your subscription will be activated automatically!</li>
+                        <li>Click the "Pay with Cashfree" button below</li>
+                        <li>Complete the payment in the secure Cashfree window</li>
+                        <li>Your subscription will be activated automatically upon successful payment</li>
+                        <li>You will receive a confirmation email</li>
                     </ol>
                 </div>
 
-                <a href="#" target="_blank" class="btn" id="cashfreeLink">
-                    Pay Now
-                </a>
-
-                <div style="margin: 20px 0;">
-                    <button class="btn btn-success" id="confirmPaymentBtn" style="width: 100%;">
-                        I have completed payment
-                    </button>
-                </div>
+                <button class="btn cashfree-link" id="cashfreePayBtn" style="width: 100%;">
+                    Pay with Cashfree
+                </button>
 
                 <div class="loading" id="paymentLoading">
                     <div class="spinner"></div>
@@ -3446,7 +3425,6 @@
         const profileAvatarUpload = document.getElementById('profileAvatarUpload');
 
         // Payment elements
-        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
         const paymentLoading = document.getElementById('paymentLoading');
         const paymentError = document.getElementById('paymentError');
         const paymentSuccess = document.getElementById('paymentSuccess');
@@ -4142,45 +4120,41 @@
         // Process demo payment automatically
         async function processDemoPayment(date, timeSlot) {
             const planData = { name: 'Demo Class', price: subscriptionPlans.demo, description: 'Introductory demo class' };
-            const orderId = `demo_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const returnUrl = `${window.location.origin}/payment-success.html`; // Your success URL
-            const notifyUrl = 'https://us-central1-supravi-yoga.cloudfunctions.net/cashfreeWebhook'; // Your webhook URL
 
             try {
-                const response = await fetch('https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                const response = await fetch("https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        orderId: orderId,
-                        orderAmount: planData.price,
-                        customerName: auth.currentUser.displayName || 'Customer',
+                        amount: planData.price,
+                        customerId: auth.currentUser.uid,
                         customerEmail: auth.currentUser.email,
-                        orderNote: 'Supravi Yoga Demo Class Booking',
-                        returnUrl: returnUrl,
-                        notifyUrl: notifyUrl
+                        customerPhone: "9876543210"
                     })
                 });
 
-                const result = await response.json();
+                const data = await response.json();
+                console.log("Demo order response:", data);
 
-                if (result.success) {
+                if (data.payment_session_id) {
                     // Store pending payment details with date and time
                     localStorage.setItem('pendingPayment', JSON.stringify({
-                        orderId: orderId,
-                        plan: { ...planData, type: 'demo' }, // Add type 'demo'
-                        bookingId: `${date}_${timeSlot}`, // Store date and time as bookingId
+                        sessionId: data.payment_session_id,
+                        plan: { ...planData, type: 'demo' },
+                        bookingId: `${date}_${timeSlot}`,
                         classId: 'demo-class'
                     }));
 
-                    // Redirect to payment URL
-                    window.open(result.paymentUrl, '_blank');
-
-                    // Start checking for payment confirmation
-                    checkPaymentStatus(orderId);
+                    // Load Cashfree Checkout.js script
+                    const script = document.createElement('script');
+                    script.src = 'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.sandbox.js';
+                    script.onload = () => {
+                        const cashfree = new Cashfree(data.payment_session_id);
+                        cashfree.open();
+                    };
+                    document.head.appendChild(script);
                 } else {
-                    alert('Failed to initiate payment. Please try again.');
+                    alert("Failed to create demo order: " + JSON.stringify(data));
                     // Re-enable button if payment initiation fails
                     document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${planData.price}`;
                     document.getElementById('confirmDemoBooking').disabled = false;
@@ -4194,66 +4168,56 @@
             }
         }
 
-        // Check payment status periodically
-        async function checkPaymentStatus(orderId) {
-            try {
-                const response = await fetch(`https://us-central1-supravi-yoga.cloudfunctions.net/getCashfreeOrderDetails?orderId=${orderId}`);
-                const result = await response.json();
+        // Handle payment success callback from Cashfree
+        function handlePaymentSuccess(paymentDetails) {
+            const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment'));
+            if (!pendingPayment) return;
 
-                if (result.success && result.paymentStatus === 'PAID') {
-                    // Payment successful, confirm booking and unlock class
-                    const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment'));
-                    if (pendingPayment && pendingPayment.orderId === orderId) {
-                        await db.collection('demo_bookings').add({
-                            userId: auth.currentUser.uid,
-                            userEmail: auth.currentUser.email,
-                            userName: auth.currentUser.displayName || 'Customer',
-                            bookingId: pendingPayment.bookingId,
-                            amount: pendingPayment.plan.price,
-                            status: 'confirmed',
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            paymentConfirmed: true,
-                            paymentDate: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-
-                        // Send notification to admin
-                        await sendDemoNotificationToAdmin({
-                            userName: auth.currentUser.displayName || auth.currentUser.email,
-                            userEmail: auth.currentUser.email,
-                            date: pendingPayment.bookingId.split('_')[0], // Extract date
-                            timeSlot: pendingPayment.bookingId.split('_')[1], // Extract time slot
-                            bookingId: orderId,
-                            userId: auth.currentUser.uid
-                        });
-
-                        alert('Payment confirmed! Your demo class is booked.');
+            if (pendingPayment.plan.type === 'demo') {
+                // Handle demo class booking
+                db.collection('demo_bookings').add({
+                    userId: auth.currentUser.uid,
+                    userEmail: auth.currentUser.email,
+                    userName: auth.currentUser.displayName || 'Customer',
+                    bookingId: pendingPayment.bookingId,
+                    amount: pendingPayment.plan.price,
+                    status: 'confirmed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paymentConfirmed: true,
+                    paymentDate: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    alert('Payment successful! Your demo class is booked.');
+                    localStorage.removeItem('pendingPayment');
+                    loadUserDashboard();
+                });
+            } else {
+                // Handle subscription payment
+                createUserSubscription(auth.currentUser.uid, pendingPayment.plan, {
+                    classId: pendingPayment.classId,
+                    sessionId: pendingPayment.sessionId
+                }).then((success) => {
+                    if (success) {
+                        alert('Payment successful! Your subscription is now active.');
                         localStorage.removeItem('pendingPayment');
                         loadUserDashboard();
                     } else {
-                        alert('Payment confirmed, but pending payment details are inconsistent. Please contact support.');
+                        alert('Payment successful but there was an error activating your subscription. Please contact support.');
                     }
-                } else if (result.success && result.paymentStatus === 'PENDING') {
-                    // Payment pending, check again later
-                    setTimeout(() => checkPaymentStatus(orderId), 5000); // Check again in 5 seconds
-                } else {
-                    // Payment failed or other error
-                    alert('Payment failed or could not be verified. Please check your payment status or contact support.');
-                    localStorage.removeItem('pendingPayment'); // Clear pending payment
-                    // Re-enable demo booking button if needed
-                    document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${subscriptionPlans.demo}`;
-                    document.getElementById('confirmDemoBooking').disabled = false;
-                }
-            } catch (error) {
-                console.error('Error checking payment status:', error);
-                alert('Error checking payment status. Please contact support.');
-                localStorage.removeItem('pendingPayment'); // Clear pending payment on error
-                // Re-enable demo booking button on error
-                document.getElementById('confirmDemoBooking').textContent = `Proceed to Payment - ₹${subscriptionPlans.demo}`;
-                document.getElementById('confirmDemoBooking').disabled = false;
+                });
             }
         }
 
-        // Continue button logic (updated)
+        // Listen for Cashfree payment callback
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'PAYMENT_SUCCESS') {
+                handlePaymentSuccess(event.data);
+            } else if (event.data.type === 'PAYMENT_FAILED') {
+                alert('Payment failed. Please try again.');
+                localStorage.removeItem('pendingPayment');
+            }
+        });
+
+        // Continue button logic (updated for Cashfree)
         document.getElementById('continueSubscriptionBtn').addEventListener('click', async () => {
             if (!selectedSubscriptionPlan) return;
 
@@ -4263,45 +4227,41 @@
                 return;
             }
 
-            const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const returnUrl = `${window.location.origin}/payment-success.html`; // Ensure this path is correct
-            const notifyUrl = 'https://us-central1-supravi-yoga.cloudfunctions.net/cashfreeWebhook';
-
             try {
-                const response = await fetch('https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                const response = await fetch("https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        orderId: orderId,
-                        orderAmount: planData.price,
-                        customerName: auth.currentUser.displayName || 'Customer',
+                        amount: planData.price,
+                        customerId: auth.currentUser.uid,
                         customerEmail: auth.currentUser.email,
-                        orderNote: `Supravi Yoga - ${planData.name}`,
-                        returnUrl: returnUrl,
-                        notifyUrl: notifyUrl
+                        customerPhone: "9876543210" // You can get this from user profile
                     })
                 });
 
-                const result = await response.json();
+                const data = await response.json();
+                console.log("Order response:", data);
 
-                if (result.success) {
-                    // Redirect to payment URL
-                    window.open(result.paymentUrl, '_blank');
-                    subscriptionModal.style.display = 'none';
-
-                    // Store orderId and plan details for payment confirmation
+                if (data.payment_session_id) {
+                    // Store pending payment details
                     localStorage.setItem('pendingPayment', JSON.stringify({
-                        orderId: orderId,
-                        plan: { ...planData, type: selectedSubscriptionPlan.split('-')[0] }, // Determine type from selectedSubscriptionPlan
+                        sessionId: data.payment_session_id,
+                        plan: { ...planData, type: selectedSubscriptionPlan.split('-')[0] },
                         classId: currentPaymentClass
                     }));
 
-                    // Start checking payment status
-                    checkPaymentStatus(orderId);
+                    // Load Cashfree Checkout.js script
+                    const script = document.createElement('script');
+                    script.src = 'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.sandbox.js';
+                    script.onload = () => {
+                        const cashfree = new Cashfree(data.payment_session_id);
+                        cashfree.open();
+                    };
+                    document.head.appendChild(script);
+                    
+                    subscriptionModal.style.display = 'none';
                 } else {
-                    alert('Failed to create payment order. Please try again.');
+                    alert("Failed to create order: " + JSON.stringify(data));
                 }
             } catch (error) {
                 console.error('Error creating order:', error);
@@ -4329,41 +4289,64 @@
         function showPaymentModal(planType, planData, orderId = null, bookingId = null) {
             selectedSubscriptionPlan = { type: planType, ...planData, orderId: orderId, bookingId: bookingId };
 
-            let paymentLink = '';
-            switch(planType) {
-                case 'group-monthly':
-                    paymentLink = 'https://payments.cashfree.com/links?code=i94u9conmt5g';
-                    break;
-                case 'group-yearly':
-                    paymentLink = 'https://payments.cashfree.com/links?code=h94u9aja6bpg';
-                    break;
-                case 'personal-monthly':
-                    paymentLink = 'https://payments.cashfree.com/links?code=u94u9gguqbpg';
-                    break;
-                case 'personal-session':
-                    paymentLink = 'https://payments.cashfree.com/links?code=h94u9i6c4t5g';
-                    break;
-                case 'demo':
-                    paymentLink = 'https://payments.cashfree.com/links?code=i94u9s7l4t5g';
-                    break;
-                default:
-                    paymentLink = '#';
-            }
-
             document.getElementById('paymentPlanDetails').innerHTML = `
                 <h3>${planData.name}</h3>
                 <p>${planData.description || ''}</p>
             `;
             document.getElementById('paymentAmount').textContent = `₹${planData.price}`;
-            document.getElementById('cashfreeLink').href = paymentLink;
-            document.getElementById('cashfreeLink').textContent = `Pay Now - ₹${planData.price}`;
+            
+            const cashfreePayBtn = document.getElementById('cashfreePayBtn');
+            cashfreePayBtn.textContent = `Pay ₹${planData.price}`;
+            
+            // Add event listener for Cashfree payment
+            cashfreePayBtn.onclick = async function() {
+                try {
+                    const response = await fetch("https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            amount: planData.price,
+                            customerId: auth.currentUser.uid,
+                            customerEmail: auth.currentUser.email,
+                            customerPhone: "9876543210"
+                        })
+                    });
+
+                    const data = await response.json();
+                    console.log("Order response:", data);
+
+                    if (data.payment_session_id) {
+                        // Store payment details
+                        localStorage.setItem('pendingPayment', JSON.stringify({
+                            sessionId: data.payment_session_id,
+                            plan: planData,
+                            classId: currentPaymentClass || 'demo-class'
+                        }));
+
+                        // Load Cashfree Checkout.js script
+                        const script = document.createElement('script');
+                        script.src = 'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.sandbox.js';
+                        script.onload = () => {
+                            const cashfree = new Cashfree(data.payment_session_id);
+                            cashfree.open();
+                        };
+                        document.head.appendChild(script);
+                        
+                        paymentModal.style.display = 'none';
+                    } else {
+                        alert("Failed to create order: " + JSON.stringify(data));
+                    }
+                } catch (error) {
+                    console.error('Error creating order:', error);
+                    alert('Failed to create payment order. Please try again.');
+                }
+            };
 
             paymentModal.style.display = 'flex';
 
             paymentLoading.style.display = 'none';
             paymentError.style.display = 'none';
             paymentSuccess.style.display = 'none';
-            confirmPaymentBtn.disabled = false;
 
             analytics.logEvent('payment_modal_opened', {
                 plan_type: planType,
@@ -4919,24 +4902,21 @@
             }
         }
 
-        // Check for payment success on page load
+        // Check for payment success on page load (simplified for Cashfree webhook)
         function checkPaymentSuccess() {
+            // Cashfree will handle success/failure through webhooks and postMessage
+            // This function is kept for any URL-based redirects if needed
             const urlParams = new URLSearchParams(window.location.search);
-            const paymentSuccessParam = urlParams.get('payment_success');
-            const orderId = urlParams.get('orderId'); // Cashfree returns orderId as query param
+            const paymentStatus = urlParams.get('payment_status');
 
-            if (paymentSuccessParam === 'true' && orderId) {
-                // Clear URL parameters
+            if (paymentStatus === 'success') {
                 window.history.replaceState({}, document.title, window.location.pathname);
-
-                // Show success message
-                alert('Payment successful! Your subscription has been activated automatically.');
-
-                // If user is logged in, refresh their dashboard
+                alert('Payment successful! Your subscription has been activated.');
                 if (auth.currentUser) {
                     loadUserDashboard();
                 }
-            } else if (paymentSuccessParam === 'false') {
+            } else if (paymentStatus === 'failed') {
+                window.history.replaceState({}, document.title, window.location.pathname);
                 alert('Payment failed. Please try again.');
             }
         }
@@ -5062,5 +5042,74 @@
             }
         });
     </script>
+
+  <script>
+    async function createOrder(amount, customerId, customerName, customerEmail, customerPhone) {
+      try {
+        const url = "https://createcashfreeorder-w6jwkvmcsa-uc.a.run.app/createCashfreeOrder";
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount,
+            customerId,
+            customerName,
+            customerEmail,
+            customerPhone
+          })
+        });
+
+        const data = await response.json();
+
+        if (data && data.payment_link) {
+          window.location.href = data.payment_link; // redirect to Cashfree checkout
+        } else {
+          alert("Payment initiation failed: " + JSON.stringify(data));
+        }
+      } catch (err) {
+        console.error("Error creating order:", err);
+        alert("Something went wrong while starting payment.");
+      }
+    }
+  </script>
+
+<script>
+async function makePayment(amount) {
+  try {
+    const response = await fetch(
+      "https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: amount,
+          customerId: "user_" + Date.now(),
+          customerName: "Yoga Student",
+          customerEmail: "student@example.com",
+          customerPhone: "9876543210"
+        })
+      }
+    );
+
+    const data = await response.json();
+    console.log("Cashfree Order Response:", data);
+
+    if (!data.payment_session_id) {
+      alert("Failed to create order: " + JSON.stringify(data));
+      return;
+    }
+
+    // ✅ Open Cashfree checkout
+    const cashfree = new Cashfree(data.payment_session_id);
+    cashfree.open();
+  } catch (err) {
+    console.error("Payment error:", err);
+    alert("Something went wrong. Try again!");
+  }
+}
+</script>
+
 </body>
+
 </html>
