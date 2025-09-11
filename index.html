@@ -5100,9 +5100,11 @@ async function makePayment(amount) {
       return;
     }
 
-    // ✅ Open Cashfree checkout
-    const cashfree = new Cashfree(data.payment_session_id);
-    cashfree.open();
+    // ✅ Correct checkout flow
+    Cashfree.checkout({
+      paymentSessionId: data.payment_session_id,
+      redirectTarget: "_self"
+    });
   } catch (err) {
     console.error("Payment error:", err);
     alert("Something went wrong. Try again!");
