@@ -2245,7 +2245,7 @@
             }
         }
     </style>
-  <script src="https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js"></script>
+  <script src="https://sdk.cashfree.com/js/v1/production/cashfree.js"></script>
 </head>
 <body>
     <!-- Welcome Note -->
@@ -4197,8 +4197,19 @@
                         userId: user.uid
                     }));
 
+                    // Ensure Cashfree SDK is loaded before using
+                    if (typeof Cashfree === 'undefined') {
+                        console.error('Cashfree SDK not loaded');
+                        alert('Payment system not initialized. Please refresh the page and try again.');
+                        return;
+                    }
+
                     // Use correct Cashfree checkout method
-                    Cashfree.checkout({
+                    const cashfree = Cashfree({
+                        mode: "production" // Use "sandbox" for testing
+                    });
+                    
+                    cashfree.checkout({
                         paymentSessionId: data.payment_session_id,
                         redirectTarget: "_self"
                     });
@@ -4214,7 +4225,51 @@
 
         // Demo payment wrapper
         async function makePayment(amount) {
-            return createCashfreeOrder(amount, 'demo');
+            try {
+                const response = await fetch(
+                    "https://us-central1-supravi-yoga.cloudfunctions.net/createCashfreeOrder",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            amount: amount,
+                            customerId: auth.currentUser?.uid || "user_" + Date.now(),
+                            customerName: auth.currentUser?.displayName || "Yoga Student",
+                            customerEmail: auth.currentUser?.email || "student@example.com",
+                            customerPhone: "9876543210"
+                        })
+                    }
+                );
+
+                const data = await response.json();
+                console.log("Cashfree Order Response:", data);
+
+                if (!data.payment_session_id) {
+                    alert("Failed to create order: " + JSON.stringify(data));
+                    return;
+                }
+
+                // Store pending payment details
+                localStorage.setItem('pendingPayment', JSON.stringify({
+                    sessionId: data.payment_session_id,
+                    planType: 'demo',
+                    amount: amount,
+                    userId: auth.currentUser?.uid
+                }));
+
+                // Initialize Cashfree checkout
+                const cashfree = Cashfree({
+                    mode: "production"
+                });
+                
+                cashfree.checkout({
+                    paymentSessionId: data.payment_session_id,
+                    redirectTarget: "_self"
+                });
+            } catch (err) {
+                console.error("Payment error:", err);
+                alert("Payment initiation failed: " + err.message);
+            }
         }
 
         // Show payment modal with subscription details
