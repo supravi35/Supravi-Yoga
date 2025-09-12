@@ -235,6 +235,18 @@
             border-top: 1px solid #eee;
         }
 
+        .desktop-auth-section {
+            position: absolute;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desktop-auth-section li {
+            margin-left: 10px;
+        }
+
         /* Welcome Note */
         .welcome-note {
             position: fixed;
@@ -2270,7 +2282,7 @@
 
                 <a href="#" class="logo" onclick="showLandingPage()">
                     <span class="logo-text">Supravi Yoga</span>
-                    <span class="logo-tagline">- Essence of Life</span>
+                    <span class="logo-tagline">- Pathway to Wellness</span>
                 </a>
 
                 <ul class="nav-links" id="navLinks">
@@ -2282,6 +2294,17 @@
                     <li><a href="#subscription" onclick="showLandingPage()">Subscription</a></li>
                     <li><a href="#postures" onclick="showLandingPage()">Postures</a></li>
                     <li><a href="#testimonials" onclick="showLandingPage()">Testimonials</a></li>
+                    
+                    <!-- Desktop Login/Signup buttons -->
+                    <div class="desktop-auth-section" id="desktopGuestSection">
+                        <li><button class="btn" id="desktopLoginBtn">Login</button></li>
+                        <li><button class="btn btn-secondary" id="desktopSignupBtn">Sign Up</button></li>
+                    </div>
+                    
+                    <div class="desktop-auth-section" id="desktopUserSection" style="display: none;">
+                        <li><button class="btn" id="desktopDashboardBtn">Dashboard</button></li>
+                        <li><button class="btn btn-danger" id="desktopLogoutBtn">Logout</button></li>
+                    </div>
 
                     <!-- Mobile Menu Sections -->
                     <div class="mobile-menu-section" id="mobileGuestSection">
@@ -2320,7 +2343,7 @@
                         <div class="about-text">
                             <p><strong>Supravi Yoga</strong> is a sanctuary for those seeking balance, strength, and inner peace through the ancient practice of yoga. Founded in 2025 by <strong>Yoga Coach Chowdary Charitha</strong>, our studio brings together traditional wisdom and modern approaches to wellness.</p>
                             <p>We believe that <strong>yoga is for everyone</strong> - regardless of age, fitness level, or experience. Our certified instructors are dedicated to creating a supportive environment where you can explore your practice safely and effectively.</p>
-                            <p>At <strong>Supravi Yoga</strong>, we offer a variety of styles including <strong>Hatha, Ashtanga-Vinyasa, and specialized yoga classes</strong>. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness.</p>
+                            <p>At <strong>Supravi Yoga</strong>, we offer a variety of styles including <strong>Hatha, Ashtanga-Vinyasa, and specialized yoga classes</strong>. Each class is carefully designed to help you build strength, increase flexibility, reduce stress, and cultivate mindfulness - your pathway to wellness.</p>
                         </div>
                         <div class="about-image">
                             <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Yoga Practice">
@@ -2676,7 +2699,52 @@
                             <textarea name="classDescription" placeholder="Class Description" rows="3" required></textarea>
                             <input type="text" name="classDuration" placeholder="Duration (e.g., 60 min)" required>
                             <input type="text" name="classLevel" placeholder="Level (e.g., Beginner)" required>
-                            <input type="number" name="classPrice" placeholder="Price" min="1" required>
+
+                            <!-- Session Type Selection -->
+                            <select name="sessionType" id="sessionTypeSelect" required>
+                                <option value="">Select Session Type</option>
+                                <option value="group">Group Sessions</option>
+                                <option value="personal">Personal Sessions</option>
+                            </select>
+
+                            <!-- Group Session Pricing -->
+                            <div id="groupPricingSection" style="display: none;">
+                                <label style="margin-top: 10px; font-weight: bold;">Group Session Pricing</label>
+
+                                <!-- Monthly Group -->
+                                <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                                    <label>Monthly Plan:</label>
+                                    <input type="number" name="groupMonthlyOriginal" placeholder="Original Price (₹)" min="1">
+                                    <input type="number" name="groupMonthlyDiscounted" placeholder="Discounted Price (₹)" min="1">
+                                </div>
+
+                                <!-- Yearly Group -->
+                                <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                                    <label>Yearly Plan:</label>
+                                    <input type="number" name="groupYearlyOriginal" placeholder="Original Price (₹)" min="1">
+                                    <input type="number" name="groupYearlyDiscounted" placeholder="Discounted Price (₹)" min="1">
+                                </div>
+                            </div>
+
+                            <!-- Personal Session Pricing -->
+                            <div id="personalPricingSection" style="display: none;">
+                                <label style="margin-top: 10px; font-weight: bold;">Personal Session Pricing</label>
+
+                                <!-- Monthly Personal -->
+                                <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                                    <label>Monthly Package (4 sessions):</label>
+                                    <input type="number" name="personalMonthlyOriginal" placeholder="Original Price (₹)" min="1">
+                                    <input type="number" name="personalMonthlyDiscounted" placeholder="Discounted Price (₹)" min="1">
+                                </div>
+
+                                <!-- Per Session Personal -->
+                                <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                                    <label>Per Session:</label>
+                                    <input type="number" name="personalSessionOriginal" placeholder="Original Price (₹)" min="1">
+                                    <input type="number" name="personalSessionDiscounted" placeholder="Discounted Price (₹)" min="1">
+                                </div>
+                            </div>
+
                             <input type="url" name="classImage" placeholder="Image URL" required>
                             <input type="url" name="classZoomLink" placeholder="Zoom Link" required>
                             <button type="submit">Add Class</button>
@@ -3159,6 +3227,13 @@
         const storage = firebase.storage();
         const analytics = firebase.analytics();
 
+        // Initialize Functions with proper region
+        const functions = firebase.functions();
+        // Use emulator for local development if needed
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            functions.useEmulator('localhost', 5001);
+        }
+
         // Configure Firestore with relaxed security rules for admin operations
         db.settings({
             cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
@@ -3337,7 +3412,7 @@
                         description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
                         duration: '60 min',
                         level: 'All Levels',
-                        price: 100,
+                        price: 99, // Updated demo price
                         image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                         zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
                         isDemo: true
@@ -3371,10 +3446,7 @@
             }
         }
 
-        // DOM Elements
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
+        // DOM Elements - Updated to match actual HTML structure
         const mobileLoginBtn = document.getElementById('mobileLoginBtn');
         const mobileSignupBtn = document.getElementById('mobileSignupBtn');
         const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
@@ -3391,8 +3463,6 @@
         const signupForm = document.getElementById('signupForm');
         const loginError = document.getElementById('loginError');
         const loginSuccess = document.getElementById('loginSuccess');
-        const signupError = document.getElementById('signupError');
-        const signupSuccess = document.getElementById('signupSuccess');
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');
         const sendOtpBtn = document.getElementById('sendOtpBtn');
@@ -3455,13 +3525,19 @@
         function updateAuthUI(isLoggedIn) {
             const mobileGuestSection = document.getElementById('mobileGuestSection');
             const mobileUserSection = document.getElementById('mobileUserSection');
+            const desktopGuestSection = document.getElementById('desktopGuestSection');
+            const desktopUserSection = document.getElementById('desktopUserSection');
 
             if (isLoggedIn) {
-                mobileGuestSection.style.display = 'none';
-                mobileUserSection.style.display = 'flex';
+                if (mobileGuestSection) mobileGuestSection.style.display = 'none';
+                if (mobileUserSection) mobileUserSection.style.display = 'flex';
+                if (desktopGuestSection) desktopGuestSection.style.display = 'none';
+                if (desktopUserSection) desktopUserSection.style.display = 'flex';
             } else {
-                mobileGuestSection.style.display = 'flex';
-                mobileUserSection.style.display = 'none';
+                if (mobileGuestSection) mobileGuestSection.style.display = 'flex';
+                if (mobileUserSection) mobileUserSection.style.display = 'none';
+                if (desktopGuestSection) desktopGuestSection.style.display = 'flex';
+                if (desktopUserSection) desktopUserSection.style.display = 'none';
             }
         }
 
@@ -3713,7 +3789,11 @@
                 const classDoc = {
                     ...classData,
                     id: classId,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    // Add default price for backward compatibility (using lowest discounted price)
+                    price: classData.sessionType === 'group' ?
+                           Math.min(classData.pricing.monthly.discounted, classData.pricing.yearly.discounted / 12) :
+                           Math.min(classData.pricing.monthly.discounted, classData.pricing.perSession.discounted)
                 };
 
                 await db.collection('classes').doc(classId).set(classDoc);
@@ -3721,12 +3801,14 @@
                 // Update local classes data
                 classesData.push({
                     id: classId,
-                    ...classData
+                    ...classData,
+                    price: classDoc.price
                 });
 
                 // Update total classes count
                 document.getElementById('totalClasses').textContent = classesData.length;
 
+                console.log('Class added with structure:', classDoc);
                 return true;
             } catch (error) {
                 console.error('Error adding class:', error);
@@ -3926,7 +4008,7 @@
                         description: 'Experience our teaching style with a complete 60-minute session. Perfect introduction to yoga. Available once per user only!',
                         duration: '60 min',
                         level: 'All Levels',
-                        price: 100,
+                        price: 99, // Updated demo price
                         image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                         zoomLink: 'https://zoom.us/j/1234567893?pwd=demo',
                         isDemo: true
@@ -3998,6 +4080,24 @@
             saveProfileBtn.disabled = false;
         });
 
+        // Session type selection handler
+        document.getElementById('sessionTypeSelect').addEventListener('change', function() {
+            const sessionType = this.value;
+            const groupSection = document.getElementById('groupPricingSection');
+            const personalSection = document.getElementById('personalPricingSection');
+
+            if (sessionType === 'group') {
+                groupSection.style.display = 'block';
+                personalSection.style.display = 'none';
+            } else if (sessionType === 'personal') {
+                groupSection.style.display = 'none';
+                personalSection.style.display = 'block';
+            } else {
+                groupSection.style.display = 'none';
+                personalSection.style.display = 'none';
+            }
+        });
+
         // Admin form handlers
         addClassForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -4008,12 +4108,69 @@
             }
 
             const formData = new FormData(e.target);
+            const sessionType = formData.get('sessionType');
+
+            if (!sessionType) {
+                alert('Please select a session type');
+                return;
+            }
+
+            // Build pricing object based on session type
+            let pricing = {};
+
+            if (sessionType === 'group') {
+                // Validate group pricing fields
+                const groupMonthlyOriginal = formData.get('groupMonthlyOriginal');
+                const groupMonthlyDiscounted = formData.get('groupMonthlyDiscounted');
+                const groupYearlyOriginal = formData.get('groupYearlyOriginal');
+                const groupYearlyDiscounted = formData.get('groupYearlyDiscounted');
+
+                if (!groupMonthlyOriginal || !groupMonthlyDiscounted || !groupYearlyOriginal || !groupYearlyDiscounted) {
+                    alert('Please fill in all group pricing fields');
+                    return;
+                }
+
+                pricing = {
+                    monthly: {
+                        original: parseInt(groupMonthlyOriginal),
+                        discounted: parseInt(groupMonthlyDiscounted)
+                    },
+                    yearly: {
+                        original: parseInt(groupYearlyOriginal),
+                        discounted: parseInt(groupYearlyDiscounted)
+                    }
+                };
+            } else if (sessionType === 'personal') {
+                // Validate personal pricing fields
+                const personalMonthlyOriginal = formData.get('personalMonthlyOriginal');
+                const personalMonthlyDiscounted = formData.get('personalMonthlyDiscounted');
+                const personalSessionOriginal = formData.get('personalSessionOriginal');
+                const personalSessionDiscounted = formData.get('personalSessionDiscounted');
+
+                if (!personalMonthlyOriginal || !personalMonthlyDiscounted || !personalSessionOriginal || !personalSessionDiscounted) {
+                    alert('Please fill in all personal session pricing fields');
+                    return;
+                }
+
+                pricing = {
+                    monthly: {
+                        original: parseInt(personalMonthlyOriginal),
+                        discounted: parseInt(personalMonthlyDiscounted)
+                    },
+                    perSession: {
+                        original: parseInt(personalSessionOriginal),
+                        discounted: parseInt(personalSessionDiscounted)
+                    }
+                };
+            }
+
             const classData = {
                 name: formData.get('className'),
                 description: formData.get('classDescription'),
                 duration: formData.get('classDuration'),
                 level: formData.get('classLevel'),
-                price: parseInt(formData.get('classPrice')),
+                sessionType: sessionType,
+                pricing: pricing,
                 image: formData.get('classImage'),
                 zoomLink: formData.get('classZoomLink')
             };
@@ -4027,8 +4184,11 @@
             const success = await addClass(classData);
 
             if (success) {
-                alert('Class added successfully!');
+                alert('Class added successfully with pricing structure!');
                 e.target.reset();
+                // Reset the pricing sections
+                document.getElementById('groupPricingSection').style.display = 'none';
+                document.getElementById('personalPricingSection').style.display = 'none';
                 updateZoomClassSelect();
                 loadUserDashboard();
             } else {
@@ -4179,9 +4339,12 @@
                 };
 
                 // Call Firebase Function to create Cashfree order
-                const createOrder = firebase.functions().httpsCallable('createCashfreeOrder');
+                const createOrder = functions.httpsCallable('createCashfreeOrder');
+
+                console.log("Calling Firebase Function with data:", orderData);
                 const result = await createOrder(orderData);
-                
+                console.log("Firebase Function response:", result);
+
                 // Store payment details for verification
                 localStorage.setItem('pendingPayment', JSON.stringify({
                     orderId: result.data.order_id,
@@ -4210,8 +4373,23 @@
 
             } catch (err) {
                 console.error("Payment error:", err);
-                alert("Payment initiation failed: " + err.message);
-                
+
+                let errorMessage = "Payment initiation failed. ";
+
+                if (err.code === 'functions/internal') {
+                    errorMessage += "Internal server error. Please try again in a few moments.";
+                } else if (err.code === 'functions/unauthenticated') {
+                    errorMessage += "Please log in to continue with payment.";
+                } else if (err.code === 'functions/permission-denied') {
+                    errorMessage += "Permission denied. Please check your account status.";
+                } else if (err.message) {
+                    errorMessage += err.message;
+                } else {
+                    errorMessage += "Unknown error occurred. Please contact support.";
+                }
+
+                alert(errorMessage);
+
                 // Re-enable buttons if they were disabled
                 const buttons = document.querySelectorAll('.btn-continue-subscription, #confirmDemoBooking, .cashfree-link');
                 buttons.forEach(btn => {
@@ -4230,19 +4408,22 @@
                 console.error('No user found for payment verification');
                 return false;
             }
-            
+
             try {
                 console.log("Verifying payment for order:", orderId);
-                
+
                 // Call Firebase Function to verify payment with Cashfree
-                const verifyPaymentFunc = firebase.functions().httpsCallable('verifyCashfreePayment');
+                const verifyPaymentFunc = functions.httpsCallable('verifyCashfreePayment');
+
+                console.log("Verifying payment for order:", orderId);
                 const result = await verifyPaymentFunc({ orderId: orderId });
+                console.log("Payment verification response:", result);
                 const verificationResult = result.data;
-                
+
                 if (verificationResult.payment_status === 'SUCCESS') {
                     // Get stored payment details
                     const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment') || '{}');
-                    
+
                     if (pendingPayment.planType === 'demo' && pendingPayment.bookingDetails) {
                         // Handle demo class booking
                         const demoBooking = {
@@ -4259,17 +4440,18 @@
                         };
 
                         await db.collection('demo_bookings').add(demoBooking);
-                        
+
                         // Unlock demo class for user
                         await db.collection('users').doc(user.uid).update({
                             unlockedClasses: firebase.firestore.FieldValue.arrayUnion('demo-class')
                         });
 
+                        const demoPrice = subscriptionPlans.demo || 100; // Use the current demo price
                         alert(`Demo class booked successfully!\n\nDate: ${pendingPayment.bookingDetails.date}\nTime: ${pendingPayment.bookingDetails.timeSlot}\n\nYou can now access the demo class from your dashboard.`);
                     } else {
                         // Handle subscription payment
                         const classId = pendingPayment.bookingDetails?.classId || 'demo-class';
-                        
+
                         // Create subscription record
                         const subscription = {
                             userId: user.uid,
@@ -4284,7 +4466,7 @@
                         };
 
                         await db.collection('user_subscriptions').add(subscription);
-                        
+
                         // Unlock class for user
                         await db.collection('users').doc(user.uid).update({
                             unlockedClasses: firebase.firestore.FieldValue.arrayUnion(classId)
@@ -4296,7 +4478,7 @@
 
                     // Clean up stored payment data
                     localStorage.removeItem('pendingPayment');
-                    
+
                     // Refresh dashboard if it's currently active
                     if (userDashboard.classList.contains('active')) {
                         loadUserDashboard();
@@ -4326,13 +4508,12 @@
         function checkPaymentStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('order_id');
-            
+
             if (orderId) {
-                // Clear URL parameters
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
                 // Verify payment
                 verifyPayment(orderId);
+                // Clear URL parameters after verification
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
@@ -4406,7 +4587,7 @@
                 console.error('Error initiating payment:', error);
                 alert('Failed to initiate payment. Please try again.');
                 subscriptionModal.style.display = 'flex';
-                
+
                 // Re-enable button
                 continueBtn.textContent = originalText;
                 continueBtn.disabled = false;
@@ -4431,7 +4612,7 @@
                 try {
                     cashfreePayBtn.textContent = 'Processing...';
                     cashfreePayBtn.disabled = true;
-                    
+
                     // Use the unified payment function
                     await createCashfreeOrder(planData.price, planType, {
                         classId: currentPaymentClass || 'demo-class',
@@ -4673,6 +4854,13 @@
         mobileSignupBtn.addEventListener('click', showSignupModal);
         mobileLogoutBtn.addEventListener('click', logout);
         mobileDashboardBtn.addEventListener('click', showDashboard);
+        
+        // Desktop auth buttons
+        document.getElementById('desktopLoginBtn').addEventListener('click', showLoginModal);
+        document.getElementById('desktopSignupBtn').addEventListener('click', showSignupModal);
+        document.getElementById('desktopLogoutBtn').addEventListener('click', logout);
+        document.getElementById('desktopDashboardBtn').addEventListener('click', showDashboard);
+        
         switchToLogin.addEventListener('click', showLoginModal);
         switchToSignup.addEventListener('click', showSignupModal);
 
@@ -4864,27 +5052,31 @@
             // Event listener for login form submission
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = loginEmail.value.trim();
-                const password = loginPassword.value.trim();
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
 
                 loginError.style.display = 'none';
                 loginSuccess.style.display = 'none';
-                loginBtn.textContent = 'Logging in...';
-                loginBtn.disabled = true;
+                
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Logging in...';
+                submitBtn.disabled = true;
 
                 try {
                     await auth.signInWithEmailAndPassword(email, password);
-                    // If successful, auth state listener will handle UI updates
-                    // loginSuccess.textContent = 'Login successful!';
-                    // loginSuccess.style.display = 'block';
-                    // closeModal(); // Close modal on successful login
+                    loginSuccess.textContent = 'Login successful!';
+                    loginSuccess.style.display = 'block';
+                    setTimeout(() => {
+                        closeModal();
+                    }, 1000);
                 } catch (error) {
                     console.error('Login error:', error);
                     loginError.textContent = `Login failed: ${error.message}`;
                     loginError.style.display = 'block';
                 } finally {
-                    loginBtn.textContent = 'Login';
-                    loginBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 }
             });
 
@@ -4911,7 +5103,10 @@
                 // Show OTP section
                 otpSection.style.display = 'block';
                 sendOtpBtn.textContent = 'Resend OTP'; // Change button text for resend
-                signupForm.querySelector('button[type="submit"]').style.display = 'none'; // Hide initial submit button
+                const submitBtn = signupForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.style.display = 'none'; // Hide initial submit button
+                }
 
                 try {
                     await sendOtpEmail(email, name, generatedOtp);
